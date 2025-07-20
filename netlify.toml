@@ -1,6 +1,13 @@
 [build]
-  command = "cd src/vanilla && yarn install && yarn build"
-  publish = "src/vanilla/dist"
+  # ビルドコマンドを実行する基準ディレクトリ
+  base = "src/vanilla"
+
+  # 実行するビルドコマンド
+  # cd src/vanilla は不要
+  command = "yarn install && yarn build"
+
+  # 公開するディレクトリ（baseからの相対パス）
+  publish = "dist"
 
 [template.environment]
   LIFF_ID = "Your LIFF ID which is aquired from LINE Dev Center"

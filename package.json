@@ -1,5 +1,5 @@
 {
-  "name": "liff-starter",
+  "name": "vanilla-starter",
   "version": "3.0.0",
   "description": "A minimun app to demo how to integrate LIFF",
   "repository": {
@@ -9,5 +9,16 @@
   "keywords": [
     "LINE",
     "LIFF"
-  ]
+  ],
+  "scripts": {
+    "dev": "webpack-dev-server --mode development",
+    "build": "webpack --mode production"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^6.4.1",
+    "dotenv-webpack": "^7.0.3",
+    "webpack": "^5.38.1",
+    "webpack-cli": "^4.7.2",
+    "webpack-dev-server": "^3.11.2"
+  }
 }
