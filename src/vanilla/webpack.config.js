@@ -1,11 +1,13 @@
-// webpack.config.js
+// src/vanilla/webpack.config.js に記述する正しいコード
+
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const Dotenv = require("dotenv-webpack");
 
 module.exports = {
-  entry: "./src/vanilla/index.js", // ←ここを修正
+  // entryのパスを修正
+  entry: "./src/index.js",
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "bundle.js",
@@ -27,7 +29,8 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: "./src/vanilla/index.html", // ← これも合わせて修正
+      // templateのパスを修正
+      template: "./src/index.html",
     }),
     new MiniCssExtractPlugin(),
     new Dotenv(),
