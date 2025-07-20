@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const backToPurchaseButton = document.getElementById("backToPurchaseButton");
 
   const GAS_URL =
-    "https://script.google.com/macros/s/AKfycbzViDXLNvEERltScVltA3SBESD7MMpiPrN2byIt8chcZYlxr43Qa1aUUHsA14Si3dFG-Q/exec";
+    "https://script.google.com/macros/s/AKfycbyY2sSBZ2y5Dj1LoFu3wuJqaa6FqesFoogp3UPEj6A7tdy7u9i-Sp26Q-HgEf-wTWGn3g/exec";
 
   // ===== ページ切り替え関数 =====
   function showPage(page) {
