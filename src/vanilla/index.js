@@ -97,8 +97,8 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .catch((error) => {
         console.error("❌ 通信エラー:", error);
-        statusMessage.textContent = "通信エラーが発生しました。";
-        statusMessage.style.color = "red";
+        statusMessage.textContent = "送信中...";
+        statusMessage.style.color = "gray";
       });
   });
 });
