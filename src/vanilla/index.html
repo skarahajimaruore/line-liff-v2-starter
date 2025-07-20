@@ -223,141 +223,150 @@
       </section>
     </div>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // LIFF 初期化
-        const liffId = "2007755942-oQ4lzEn9";
-        liff
-          .init({ liffId })
-          .then(() => console.log("✅ LIFF OK"))
-          .catch((e) => console.error("❌ LIFF NG", e));
+    // <script>タグの中身をこれに置き換えてください
 
-        // 要素取得
-        const registrationSection = document.getElementById(
-          "registrationSection"
-        );
-        const purchaseSection = document.getElementById("purchaseSection");
-        const completeSection = document.getElementById("completeSection");
-        const nameInput = document.getElementById("nameInput");
-        const employeeIdInput = document.getElementById("employeeIdInput");
-        const submitButton = document.getElementById("submitButton");
-        const statusMessage = document.getElementById("statusMessage");
-        const userNameDisplay = document.getElementById("userNameDisplay");
-        const logoutButton = document.getElementById("logoutButton");
-        const purchaseButtons = document.querySelectorAll(".purchase-button");
-        const purchaseStatus = document.getElementById("purchaseStatus");
-        const backToPurchaseButton = document.getElementById(
-          "backToPurchaseButton"
-        );
+document.addEventListener("DOMContentLoaded", function () {
+  // LIFF 初期化
+  const liffId = "2007755942-oQ4lzEn9";
+  liff
+    .init({ liffId })
+    .then(() => console.log("✅ LIFF OK"))
+    .catch((e) => console.error("❌ LIFF NG", e));
 
-        const GAS_URL =
-          "https://script.google.com/macros/s/＜あなたのGAS_URL＞/exec";
+  // 要素取得
+  const registrationSection = document.getElementById(
+    "registrationSection"
+  );
+  const purchaseSection = document.getElementById("purchaseSection");
+  const completeSection = document.getElementById("completeSection");
+  const nameInput = document.getElementById("nameInput");
+  const employeeIdInput = document.getElementById("employeeIdInput");
+  const submitButton = document.getElementById("submitButton");
+  const statusMessage = document.getElementById("statusMessage");
+  const userNameDisplay = document.getElementById("userNameDisplay");
+  const logoutButton = document.getElementById("logoutButton");
+  const purchaseButtons = document.querySelectorAll(".purchase-button");
+  const purchaseStatus = document.getElementById("purchaseStatus");
+  const backToPurchaseButton = document.getElementById(
+    "backToPurchaseButton"
+  );
 
-        // ページ切り替え
-        function showPage(page) {
-          registrationSection.style.display = "none";
-          purchaseSection.style.display = "none";
-          completeSection.style.display = "none";
-          if (page === "purchase") {
-            userNameDisplay.textContent = localStorage.getItem("userName");
-            purchaseSection.style.display = "flex";
-          } else if (page === "complete") {
-            completeSection.style.display = "block";
-          } else {
-            registrationSection.style.display = "flex";
-          }
-        }
+  const GAS_URL =
+    "https://script.google.com/macros/s/AKfycbw1KJFJVZXIq_T3oepqsa3LOTvLU5-M2epHs-IO__hQwq-x7nSxu_Xx1Q3_u5ZJ4q8E3A/exec"; // ★あなたのGAS URLに書き換えてください
 
-        // 初期表示
-        if (localStorage.getItem("employeeId")) {
+  // ページ切り替え
+  function showPage(page) {
+    registrationSection.style.display = "none";
+    purchaseSection.style.display = "none";
+    completeSection.style.display = "none";
+    if (page === "purchase") {
+      userNameDisplay.textContent = localStorage.getItem("userName");
+      purchaseSection.style.display = "flex";
+    } else if (page === "complete") {
+      completeSection.style.display = "block";
+    } else {
+      registrationSection.style.display = "flex";
+    }
+  }
+
+  // 初期表示
+  if (localStorage.getItem("employeeId")) {
+    showPage("purchase");
+  } else {
+    showPage("registration");
+  }
+
+  // 登録処理
+  submitButton.addEventListener("click", () => {
+    const name = nameInput.value.trim();
+    const employeeId = employeeIdInput.value.trim();
+    if (!name || !employeeId) {
+      statusMessage.textContent = "⚠️ 名前と社員番号を入力してください";
+      statusMessage.className = "error";
+      return;
+    }
+    statusMessage.textContent = "📡 登録中…";
+    statusMessage.className = "";
+
+    const postData = { name, employeeId, action: "register" };
+
+    fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify(postData),
+      headers: { "Content-Type": "application/json" },
+    })
+    .then(r => {
+        if (!r.ok) throw new Error("サーバー応答エラー");
+        return r.json();
+    })
+    .then((data) => {
+        if (data.result === "success") {
+          localStorage.setItem("userName", name);
+          localStorage.setItem("employeeId", employeeId);
           showPage("purchase");
         } else {
-          showPage("registration");
+          throw new Error(data.message);
         }
+    })
+    .catch((err) => {
+        console.error(err);
+        statusMessage.textContent = "登録に失敗しました";
+        statusMessage.className = "error";
+    });
+  });
 
-        // 登録処理
-        submitButton.addEventListener("click", () => {
-          const name = nameInput.value.trim();
-          const employeeId = employeeIdInput.value.trim();
-          if (!name || !employeeId) {
-            statusMessage.textContent = "⚠️ 名前と社員番号を入力してください";
-            statusMessage.className = "error";
-            return;
-          }
-          statusMessage.textContent = "📡 登録中…";
-          statusMessage.className = "";
+  // 購入処理 (★ここを修正★)
+  purchaseButtons.forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const bentoName = btn.dataset.bentoName;
+      
+      // 確認ダイアログを表示
+      if (confirm(`${bentoName}を購入します。よろしいですか？`)) {
+        const name = localStorage.getItem("userName");
+        const employeeId = localStorage.getItem("employeeId");
+        if (!name || !employeeId) return showPage("registration");
 
-          const params = new URLSearchParams({
-            name,
-            employeeId,
-            action: "register",
-          });
-          fetch(GAS_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: params.toString(),
-          })
-            .then((r) => r.json())
-            .then((data) => {
-              if (data.result === "success") {
-                localStorage.setItem("userName", name);
-                localStorage.setItem("employeeId", employeeId);
-                showPage("purchase");
-              } else {
-                throw new Error(data.message);
-              }
-            })
-            .catch((err) => {
-              console.error(err);
-              statusMessage.textContent = "登録中...";
-              statusMessage.className = "error";
-            });
+        purchaseStatus.textContent = "📡 購入中…";
+        purchaseStatus.className = "";
+
+        const postData = { name, employeeId, bentoName };
+        
+        fetch(GAS_URL, {
+          method: "POST",
+          body: JSON.stringify(postData),
+          headers: { "Content-Type": "application/json" },
+        })
+        .then(r => {
+            if (!r.ok) throw new Error("サーバー応答エラー");
+            return r.json();
+        })
+        .then((data) => {
+            if (data.result === "success") {
+              showPage("complete");
+            } else {
+              throw new Error(data.message);
+            }
+        })
+        .catch((err) => {
+            console.error(err);
+            purchaseStatus.textContent = "購入に失敗しました";
+            purchaseStatus.className = "error";
         });
+      }
+    })
+  );
 
-        // 購入処理
-        purchaseButtons.forEach((btn) =>
-          btn.addEventListener("click", () => {
-            const bentoName = btn.dataset.bentoName;
-            const name = localStorage.getItem("userName");
-            const employeeId = localStorage.getItem("employeeId");
-            if (!name || !employeeId) return showPage("registration");
+  // ログアウト
+  logoutButton.addEventListener("click", () => {
+    if (confirm("登録情報を削除しますか？")) {
+      localStorage.removeItem("userName");
+      localStorage.removeItem("employeeId");
+      showPage("registration");
+    }
+  });
 
-            purchaseStatus.textContent = "📡 購入中…";
-            purchaseStatus.className = "";
-
-            const params = new URLSearchParams({ name, employeeId, bentoName });
-            fetch(GAS_URL, {
-              method: "POST",
-              headers: { "Content-Type": "application/x-www-form-urlencoded" },
-              body: params.toString(),
-            })
-              .then((r) => r.json())
-              .then((data) => {
-                if (data.result === "success") {
-                  showPage("complete");
-                } else {
-                  throw new Error(data.message);
-                }
-              })
-              .catch((err) => {
-                console.error(err);
-                purchaseStatus.textContent = "購入中...";
-                purchaseStatus.className = "error";
-              });
-          })
-        );
-
-        // ログアウト
-        logoutButton.addEventListener("click", () => {
-          localStorage.clear();
-          showPage("registration");
-        });
-
-        // 続けて購入
-        backToPurchaseButton.addEventListener("click", () => {
-          showPage("purchase");
-        });
-      });
-    </script>
-  </body>
-</html>
+  // 続けて購入
+  backToPurchaseButton.addEventListener("click", () => {
+    showPage("purchase");
+  });
+});
