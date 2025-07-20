@@ -13,7 +13,7 @@
       rel="stylesheet"
     />
     <style>
-      /* ボックスサイズのリセット */
+      /* リセット */
       html {
         box-sizing: border-box;
         height: 100%;
@@ -32,7 +32,7 @@
         background: linear-gradient(135deg, #e0f7f3, #f5fdfb);
       }
 
-      /* 画面中央に配置 */
+      /* 画面中央ラッパー */
       .wrapper {
         display: flex;
         align-items: center;
@@ -41,8 +41,11 @@
         padding: 1rem;
       }
 
-      /* ガラスカード */
+      /* カード */
       .glass {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem; /* アイテム間スペース */
         background: rgba(255, 255, 255, 0.8);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
@@ -50,7 +53,7 @@
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
         padding: 2rem 1.5rem;
         width: 100%;
-        max-width: 360px; /* ← 幅を360pxに */
+        max-width: 340px; /* ← 幅を340pxに */
         animation: fadeIn 0.5s ease-in-out;
       }
       @keyframes fadeIn {
@@ -68,35 +71,31 @@
         font-size: 1.6rem;
         font-weight: 700;
         text-align: center;
-        margin: 0 0 0.5rem;
+        margin: 0;
         color: #1f2937;
       }
-
       .subtitle {
-        text-align: center;
-        color: #6b7280;
         font-size: 0.9rem;
-        margin: 0 0 1.5rem;
+        color: #6b7280;
+        text-align: center;
+        margin: 0 0 1rem;
         line-height: 1.5;
       }
 
       label {
-        display: block;
-        font-weight: 600;
         font-size: 0.9rem;
-        margin: 0 0 0.4rem;
+        font-weight: 600;
         color: #374151;
+        margin: 0;
       }
 
       input[type="text"] {
-        display: block;
         width: 100%;
         padding: 0.9rem 1rem;
         font-size: 1rem;
         border: 1px solid #d1d5db;
         border-radius: 0.6rem;
-        margin: 0 0 1.2rem;
-        background-color: #fff;
+        background: #fff;
         transition: border 0.2s, box-shadow 0.2s;
       }
       input[type="text"]:focus {
@@ -106,18 +105,16 @@
       }
 
       button {
-        display: block;
         width: 100%;
         padding: 1rem;
         font-size: 1.05rem;
         font-weight: 600;
-        background: linear-gradient(to right, #06c755, #00b14f);
         color: #fff;
+        background: linear-gradient(to right, #06c755, #00b14f);
         border: none;
         border-radius: 0.6rem;
         cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        margin-top: 1.2rem; /* 送信ボタンの高さを下げる */
+        transition: transform 0.2s, box-shadow 0.2s;
       }
       button:hover {
         transform: translateY(-2px);
@@ -125,10 +122,9 @@
       }
 
       #statusMessage {
-        margin: 1rem 0 0;
-        text-align: center;
-        font-weight: 600;
         font-size: 0.9rem;
+        font-weight: 600;
+        text-align: center;
         min-height: 1.2em;
       }
       .success {
@@ -138,10 +134,9 @@
         color: #ef4444;
       }
 
-      /* モバイル時 */
       @media (max-width: 400px) {
         .glass {
-          max-width: 80%; /* 画面幅の80%で表示 */
+          max-width: 80%;
           padding: 1.5rem 1rem;
         }
         h1 {
@@ -175,56 +170,50 @@
         const liffId = "2007755942-oQ4lzEn9";
         liff
           .init({ liffId })
-          .then(() => console.log("✅ LIFF初期化成功"))
-          .catch((err) => console.error("❌ LIFF初期化失敗:", err));
+          .then(() => console.log("✅ LIFF OK"))
+          .catch((e) => console.error(e));
 
-        const nameInput = document.getElementById("nameInput");
-        const employeeIdInput = document.getElementById("employeeIdInput");
-        const submitButton = document.getElementById("submitButton");
-        const statusMessage = document.getElementById("statusMessage");
+        const ni = document.getElementById("nameInput"),
+          ei = document.getElementById("employeeIdInput"),
+          btn = document.getElementById("submitButton"),
+          msg = document.getElementById("statusMessage"),
+          url =
+            "https://script.google.com/macros/s/AKfycbwv7QqlYbC870ssiOsMYljs1ZsLRyM03mBWpixSBTAp_SrHbtFLHBYHANojlBdQ2qf5JQ/exec";
 
-        const gasUrl =
-          "https://script.google.com/macros/s/AKfycbwv7QqlYbC870ssiOsMYljs1ZsLRyM03mBWpixSBTAp_SrHbtFLHBYHANojlBdQ2qf5JQ/exec";
-
-        submitButton.addEventListener("click", () => {
-          const name = nameInput.value.trim();
-          const employeeId = employeeIdInput.value.trim();
-
-          if (!name || !employeeId) {
-            statusMessage.textContent = "⚠️ 入力が不足しています";
-            statusMessage.className = "error";
+        btn.addEventListener("click", () => {
+          const name = ni.value.trim(),
+            id = ei.value.trim();
+          if (!name || !id) {
+            msg.textContent = "⚠️ 入力が不足しています";
+            msg.className = "error";
             return;
           }
-
-          statusMessage.textContent = "📡 送信中...";
-          statusMessage.className = "";
-
-          fetch(gasUrl, {
+          msg.textContent = "📡 送信中...";
+          msg.className = "";
+          fetch(url, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: JSON.stringify({ name, employeeId }),
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: JSON.stringify({ name, employeeId: id }),
           })
-            .then((res) => {
-              if (!res.ok) throw new Error("エラー：" + res.status);
-              return res.json();
+            .then((r) => {
+              if (!r.ok) throw new Error(r.status);
+              return r.json();
             })
-            .then((data) => {
-              if (data.result === "success") {
-                statusMessage.textContent = "✅ 送信完了しました！";
-                statusMessage.className = "success";
-                nameInput.value = "";
-                employeeIdInput.value = "";
+            .then((d) => {
+              if (d.result === "success") {
+                msg.textContent = "✅ 送信完了しました！";
+                msg.className = "success";
+                ni.value = "";
+                ei.value = "";
               } else {
-                statusMessage.textContent = "⚠️ サーバーエラーが発生しました";
-                statusMessage.className = "error";
+                msg.textContent = "⚠️ サーバーエラーが発生しました";
+                msg.className = "error";
               }
             })
-            .catch((err) => {
-              console.error(err);
-              statusMessage.textContent = "❌ 通信エラーが発生しました";
-              statusMessage.className = "error";
+            .catch((e) => {
+              console.error(e);
+              msg.textContent = "❌ 通信エラーが発生しました";
+              msg.className = "error";
             });
         });
       });
