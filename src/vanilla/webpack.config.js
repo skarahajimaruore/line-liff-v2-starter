@@ -1,38 +1,65 @@
-// src/vanilla/webpack.config.js に記述する正しいコード
-
 const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
+const webpack = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const Dotenv = require("dotenv-webpack");
 
-module.exports = {
-  // entryのパスを修正
-  entry: "./src/index.js",
+const env = process.env.NODE_ENV || "production";
+
+const config = {
+  mode: env,
+
+  entry: path.resolve(__dirname, "index.js"),
+
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "bundle.js",
+    filename: "[name].bundle.js",
+    publicPath: "/",
   },
+
+  resolve: {
+    fallback: {
+      crypto: false,
+    },
+  },
+
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.(js|jsx)$/,
         exclude: /node_modules/,
-        use: {
-          loader: "babel-loader",
-        },
+        use: "babel-loader",
       },
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, "css-loader"],
+        use: [
+          env === "development" ? "style-loader" : MiniCssExtractPlugin.loader,
+          "css-loader",
+        ],
       },
     ],
   },
+
   plugins: [
-    new HtmlWebpackPlugin({
-      // templateのパスを修正
-      template: "./src/index.html",
+    new Dotenv({ systemvars: true }),
+    new webpack.HotModuleReplacementPlugin(),
+    new MiniCssExtractPlugin({
+      filename: "[name].css",
+      chunkFilename: "[id].css",
     }),
-    new MiniCssExtractPlugin(),
-    new Dotenv(),
+    new HtmlWebpackPlugin({
+      template: path.resolve(__dirname, "index.html"),
+    }),
   ],
+
+  devServer: {
+    static: {
+      directory: path.join(__dirname, "public"),
+      watch: true,
+    },
+    port: 3000,
+    hot: true,
+  },
 };
+
+module.exports = config;
