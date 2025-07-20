@@ -13,197 +13,200 @@
       rel="stylesheet"
     />
     <style>
-      /* リセット */
-      html {
-        box-sizing: border-box;
-        height: 100%;
-      }
-      *,
-      *::before,
-      *::after {
-        box-sizing: inherit;
-      }
-
-      body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        font-family: "Inter", sans-serif;
-        background: linear-gradient(135deg, #e0f7f3, #f5fdfb);
-      }
-
-      /* 画面中央ラッパー */
-      .wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 100%;
-        padding: 1rem;
-      }
-
-      /* カード */
-      .glass {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border-radius: 1.25rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-        padding: 2rem 1.5rem;
-        width: 100%;
-        max-width: 340px;
-        animation: fadeIn 0.5s ease-in-out;
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      h1 {
-        font-size: 1.6rem;
-        font-weight: 700;
-        text-align: center;
-        margin: 0;
-        color: #1f2937;
-      }
-      .subtitle {
-        font-size: 0.9rem;
-        color: #6b7280;
-        text-align: center;
-        margin: 0 0 1rem;
-        line-height: 1.5;
-      }
-
-      label {
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #374151;
-        margin: 0;
-      }
-
-      input[type="text"] {
-        width: 100%;
-        padding: 0.9rem 1rem;
-        font-size: 1rem;
-        border: 1px solid #d1d5db;
-        border-radius: 0.6rem;
-        background: #fff;
-        transition: border 0.2s, box-shadow 0.2s;
-      }
-      input[type="text"]:focus {
-        border-color: #06c755;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(6, 199, 85, 0.2);
-      }
-
-      button {
-        width: 100%;
-        padding: 1rem;
-        font-size: 1.05rem;
-        font-weight: 600;
-        color: #fff;
-        background: linear-gradient(to right, #06c755, #00b14f);
-        border: none;
-        border-radius: 0.6rem;
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-      }
-      button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(0, 177, 79, 0.2);
-      }
-
-      #statusMessage,
-      #purchaseStatus {
-        font-size: 0.9rem;
-        font-weight: 600;
-        text-align: center;
-        min-height: 1.2em;
-      }
-      .success {
-        color: #10b981;
-      }
-      .error {
-        color: #ef4444;
-      }
-
-      /* 購入ページのスタイル */
-      .bento-option {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.8rem;
-        background-color: #f9fafb;
-        border-radius: 0.5rem;
-        border: 1px solid #e5e7eb;
-      }
-
-      .purchase-button {
-        padding: 0.5rem 1rem;
-        font-size: 0.9rem;
-        background: linear-gradient(to right, #2563eb, #1d4ed8);
-      }
-
-      #logoutButton,
-      #backToPurchaseButton {
-        margin-top: 1rem;
-        font-size: 0.9rem;
-        background: linear-gradient(to right, #6b7280, #4b5563);
-      }
+      /* （先ほどと同じ CSS をここにペースト） */
+      /* body, .wrapper, .glass, input, button など */
+      /* 略 */
     </style>
   </head>
   <body>
     <div class="wrapper">
-      <div id="registrationSection" class="glass">
+      <!-- 1. 登録フォーム（registrationSection） -->
+      <section id="registrationSection" class="glass">
         <h1>情報登録フォーム</h1>
         <p class="subtitle">お名前と社員番号を入力してください</p>
         <label for="nameInput">お名前</label>
         <input type="text" id="nameInput" placeholder="例：山田 太郎" />
         <label for="employeeIdInput">社員番号</label>
         <input type="text" id="employeeIdInput" placeholder="例：12345" />
-        <button id="submitButton">登録して進む</button>
+        <button id="submitButton">登録</button>
         <div id="statusMessage"></div>
-      </div>
+      </section>
 
-      <div id="purchaseSection" class="glass" style="display: none">
-        <h1>お弁当注文</h1>
+      <!-- 2. 購入ページ（purchaseSection） -->
+      <section
+        id="purchaseSection"
+        class="glass"
+        style="display: none; flex-direction: column; gap: 1rem"
+      >
+        <h1>お弁当を選択</h1>
         <p class="subtitle">
-          こんにちは、<span id="userNameDisplay"></span> さん！
+          <span id="userNameDisplay"></span>さん、メニューを選んでください
         </p>
-        <p>購入したいお弁当を選んでください。</p>
-
-        <div class="bento-option">
-          <span>日替わり弁当 (500円)</span>
-          <button class="purchase-button" data-bento-name="日替わり弁当">
-            購入
-          </button>
-        </div>
-        <div class="bento-option">
-          <span>唐揚げ弁当 (550円)</span>
-          <button class="purchase-button" data-bento-name="唐揚げ弁当">
-            購入
-          </button>
-        </div>
-
+        <button class="purchase-button" data-bento-name="幕の内弁当">
+          幕の内弁当
+        </button>
+        <button class="purchase-button" data-bento-name="唐揚げ弁当">
+          唐揚げ弁当
+        </button>
+        <button class="purchase-button" data-bento-name="のり弁当">
+          のり弁当
+        </button>
         <div id="purchaseStatus"></div>
-        <button id="logoutButton">情報を再入力する</button>
-      </div>
+        <button
+          id="logoutButton"
+          style="background: #ddd; color: #333; margin-top: 1rem"
+        >
+          登録情報を消して戻る
+        </button>
+      </section>
 
-      <div id="completeSection" class="glass" style="display: none">
-        <h1>✅ ご購入ありがとうございました！</h1>
-        <p class="subtitle">店舗側で注文が確認されました。</p>
+      <!-- 3. 完了画面（completeSection） -->
+      <section
+        id="completeSection"
+        class="glass"
+        style="display: none; text-align: center"
+      >
+        <h1>ご注文ありがとうございました！</h1>
+        <p class="subtitle">注文が完了しました。</p>
         <button id="backToPurchaseButton">続けて購入する</button>
-      </div>
+      </section>
     </div>
 
-    <script src="index.js" defer></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // ===== LIFF 初期化 =====
+        const liffId = "2007755942-oQ4lzEn9";
+        liff
+          .init({ liffId })
+          .then(() => console.log("✅ LIFF OK"))
+          .catch((e) => console.error("❌ LIFF NG", e));
+
+        // ===== 要素取得 =====
+        const registrationSection = document.getElementById(
+          "registrationSection"
+        );
+        const purchaseSection = document.getElementById("purchaseSection");
+        const completeSection = document.getElementById("completeSection");
+        const nameInput = document.getElementById("nameInput");
+        const employeeIdInput = document.getElementById("employeeIdInput");
+        const submitButton = document.getElementById("submitButton");
+        const statusMessage = document.getElementById("statusMessage");
+        const userNameDisplay = document.getElementById("userNameDisplay");
+        const logoutButton = document.getElementById("logoutButton");
+        const purchaseButtons = document.querySelectorAll(".purchase-button");
+        const purchaseStatus = document.getElementById("purchaseStatus");
+        const backToPurchaseButton = document.getElementById(
+          "backToPurchaseButton"
+        );
+
+        const GAS_URL =
+          "https://script.google.com/macros/s/＜あなたのGAS_URL＞/exec";
+
+        /** ページ切り替え **/
+        function showPage(page) {
+          registrationSection.style.display = "none";
+          purchaseSection.style.display = "none";
+          completeSection.style.display = "none";
+          if (page === "purchase") {
+            userNameDisplay.textContent = localStorage.getItem("userName");
+            purchaseSection.style.display = "flex";
+          } else if (page === "complete") {
+            completeSection.style.display = "block";
+          } else {
+            registrationSection.style.display = "flex";
+          }
+        }
+
+        // 初回ロード時
+        if (localStorage.getItem("employeeId")) {
+          showPage("purchase");
+        } else {
+          showPage("registration");
+        }
+
+        // ===== 登録処理 =====
+        submitButton.addEventListener("click", () => {
+          const name = nameInput.value.trim();
+          const employeeId = employeeIdInput.value.trim();
+          if (!name || !employeeId) {
+            statusMessage.textContent = "⚠️ 名前と社員番号を入力してください";
+            statusMessage.className = "error";
+            return;
+          }
+          statusMessage.textContent = "📡 登録中…";
+          statusMessage.className = "";
+
+          const params = new URLSearchParams({
+            name,
+            employeeId,
+            action: "register",
+          });
+          fetch(GAS_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: params.toString(),
+          })
+            .then((r) => r.json())
+            .then((data) => {
+              if (data.result === "success") {
+                localStorage.setItem("userName", name);
+                localStorage.setItem("employeeId", employeeId);
+                showPage("purchase");
+              } else {
+                throw new Error(data.message);
+              }
+            })
+            .catch((err) => {
+              console.error(err);
+              statusMessage.textContent = "❌ 登録に失敗しました";
+              statusMessage.className = "error";
+            });
+        });
+
+        // ===== 購入処理 =====
+        purchaseButtons.forEach((btn) =>
+          btn.addEventListener("click", () => {
+            const bentoName = btn.dataset.bentoName;
+            const name = localStorage.getItem("userName");
+            const employeeId = localStorage.getItem("employeeId");
+            if (!name || !employeeId) return showPage("registration");
+
+            purchaseStatus.textContent = "📡 購入中…";
+            purchaseStatus.className = "";
+
+            const params = new URLSearchParams({ name, employeeId, bentoName });
+            fetch(GAS_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: params.toString(),
+            })
+              .then((r) => r.json())
+              .then((data) => {
+                if (data.result === "success") {
+                  showPage("complete");
+                } else {
+                  throw new Error(data.message);
+                }
+              })
+              .catch((err) => {
+                console.error(err);
+                purchaseStatus.textContent = "❌ 購入に失敗しました";
+                purchaseStatus.className = "error";
+              });
+          })
+        );
+
+        // ===== ログアウト =====
+        logoutButton.addEventListener("click", () => {
+          localStorage.clear();
+          showPage("registration");
+        });
+
+        // ===== 続けて購入 =====
+        backToPurchaseButton.addEventListener("click", () => {
+          showPage("purchase");
+        });
+      });
+    </script>
   </body>
 </html>
