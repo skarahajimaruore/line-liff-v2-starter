@@ -5,18 +5,16 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const Dotenv = require("dotenv-webpack");
 
-const env = process.env.NODE_ENV || "development";
+const env = process.env.NODE_ENV || "production";
 
 const commonConfig = {
   mode: env,
 
   devServer: {
-    static: [
-      {
-        directory: path.join(__dirname, "public"),
-        watch: true,
-      },
-    ],
+    static: {
+      directory: path.join(__dirname, "public"),
+      watch: true,
+    },
     port: 3000,
   },
 
