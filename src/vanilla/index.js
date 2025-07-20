@@ -1,40 +1,44 @@
-// HTMLでLIFFのSDKを読み込んでいるため、ここでのimportは不要
-// import liff from "@line/liff";
-
 document.addEventListener("DOMContentLoaded", function () {
   // ===== LIFF初期化 =====
+  const liffId = "2007755942-oQ4lzEn9"; // あなたのLIFF ID
   liff
-    .init({ liffId: "2007755942-oQ4lzEn9" })
+    .init({ liffId: liffId })
     .then(() => console.log("✅ LIFF OK"))
     .catch((e) => console.error("❌ LIFF NG", e));
 
   // ===== 要素取得 =====
   const registrationSection = document.getElementById("registrationSection");
   const purchaseSection = document.getElementById("purchaseSection");
+  const completeSection = document.getElementById("completeSection");
   const nameInput = document.getElementById("nameInput");
   const employeeIdInput = document.getElementById("employeeIdInput");
   const submitButton = document.getElementById("submitButton");
   const statusMessage = document.getElementById("statusMessage");
   const userNameDisplay = document.getElementById("userNameDisplay");
   const logoutButton = document.getElementById("logoutButton");
+  const purchaseButtons = document.querySelectorAll(".purchase-button");
+  const purchaseStatus = document.getElementById("purchaseStatus");
+  const backToPurchaseButton = document.getElementById("backToPurchaseButton");
 
   const gasWebAppUrl =
-    "https://script.google.com/macros/s/AKfycbwv7QqlYbC870ssiOsMYljs1ZsLRyM03mBWpixSBTAp_SrHbtFLHBYHANojlBdQ2qf5JQ/exec";
+    "https://script.google.com/macros/s/AKfycbySXTpxp3FWR0INFXb1cBhi3W-3gwEfHDbtpWGhd3Ubv6wsf2u3bjnWfxoqmjNDn0krag/exec"; // あなたのGASのURL
 
   // ===== 関数定義 =====
 
   /** ページ表示を切り替える関数 */
   function showPage(pageName) {
-    const userName = localStorage.getItem("userName");
-    const employeeId = localStorage.getItem("employeeId");
+    registrationSection.style.display = "none";
+    purchaseSection.style.display = "none";
+    completeSection.style.display = "none";
 
-    if (pageName === "purchase" && userName && employeeId) {
-      userNameDisplay.textContent = userName; // 購入ページに名前を表示
-      registrationSection.style.display = "none";
-      purchaseSection.style.display = "flex"; // flexで表示
+    if (pageName === "purchase") {
+      const userName = localStorage.getItem("userName");
+      userNameDisplay.textContent = userName;
+      purchaseSection.style.display = "flex";
+    } else if (pageName === "complete") {
+      completeSection.style.display = "flex";
     } else {
       registrationSection.style.display = "flex";
-      purchaseSection.style.display = "none";
     }
   }
 
@@ -44,24 +48,66 @@ document.addEventListener("DOMContentLoaded", function () {
   submitButton.addEventListener("click", () => {
     const name = nameInput.value.trim();
     const employeeId = employeeIdInput.value.trim();
-
     if (!name || !employeeId) {
       statusMessage.textContent = "名前と社員番号を入力してください。";
       statusMessage.className = "error";
       return;
     }
-
-    // ここではGASに送信せず、情報を保存してページを切り替えるだけ
     localStorage.setItem("userName", name);
     localStorage.setItem("employeeId", employeeId);
-
     statusMessage.textContent = "✅ 情報を記憶しました！";
     statusMessage.className = "success";
-
-    // 0.5秒後に購入ページへ遷移
     setTimeout(() => {
       showPage("purchase");
     }, 500);
+  });
+
+  // 購入ボタン（複数）の処理
+  purchaseButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const bentoName = button.dataset.bentoName;
+      const userName = localStorage.getItem("userName");
+      const employeeId = localStorage.getItem("employeeId");
+
+      if (!userName || !employeeId) {
+        alert("情報がありません。登録画面に戻ります。");
+        showPage("registration");
+        return;
+      }
+
+      purchaseStatus.textContent = "📡 購入処理中...";
+      purchaseStatus.className = "";
+
+      const postData = { name: userName, employeeId, bentoName };
+
+      fetch(gasWebAppUrl, {
+        method: "POST",
+        body: JSON.stringify(postData),
+        headers: { "Content-Type": "application/json" },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            // レスポンスがOKでない場合、エラーとして処理
+            throw new Error("サーバーからの応答エラー");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          if (data.result === "success") {
+            console.log("✅ GASへの送信リクエスト完了");
+            purchaseStatus.textContent = "";
+            showPage("complete");
+          } else {
+            // GAS側でエラーが返された場合
+            throw new Error(data.message || "サーバー側でエラーが発生しました");
+          }
+        })
+        .catch((error) => {
+          console.error("❌ 送信エラー:", error);
+          purchaseStatus.textContent = "購入に失敗しました。";
+          purchaseStatus.className = "error";
+        });
+    });
   });
 
   // ログアウト（情報削除）ボタンの処理
@@ -73,9 +119,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // ===== 初期化処理 =====
+  // 「続けて購入する」ボタンの処理
+  backToPurchaseButton.addEventListener("click", () => {
+    showPage("purchase");
+  });
 
-  // ページ読み込み時に、情報が保存されていれば購入ページを直接表示
+  // ===== 初期化処理 =====
   const savedId = localStorage.getItem("employeeId");
   if (savedId) {
     showPage("purchase");

@@ -12,282 +12,52 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
-    <style>
-      /* リセット */
-      html {
-        box-sizing: border-box;
-        height: 100%;
-      }
-      *,
-      *::before,
-      *::after {
-        box-sizing: inherit;
-      }
-
-      body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        font-family: "Inter", sans-serif;
-        background: linear-gradient(135deg, #e0f7f3, #f5fdfb);
-      }
-
-      /* 画面中央ラッパー */
-      .wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 100%;
-        padding: 1rem;
-      }
-
-      /* カード */
-      .glass {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem; /* アイテム間スペース */
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border-radius: 1.25rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-        padding: 2rem 1.5rem;
-        width: 100%;
-        max-width: 340px; /* ← 幅を340pxに */
-        animation: fadeIn 0.5s ease-in-out;
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      h1 {
-        font-size: 1.6rem;
-        font-weight: 700;
-        text-align: center;
-        margin: 0;
-        color: #1f2937;
-      }
-      .subtitle {
-        font-size: 0.9rem;
-        color: #6b7280;
-        text-align: center;
-        margin: 0 0 1rem;
-        line-height: 1.5;
-      }
-
-      label {
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #374151;
-        margin: 0;
-      }
-
-      input[type="text"] {
-        width: 100%;
-        padding: 0.9rem 1rem;
-        font-size: 1rem;
-        border: 1px solid #d1d5db;
-        border-radius: 0.6rem;
-        background: #fff;
-        transition: border 0.2s, box-shadow 0.2s;
-      }
-      input[type="text"]:focus {
-        border-color: #06c755;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(6, 199, 85, 0.2);
-      }
-
-      button {
-        width: 100%;
-        padding: 1rem;
-        font-size: 1.05rem;
-        font-weight: 600;
-        color: #fff;
-        background: linear-gradient(to right, #06c755, #00b14f);
-        border: none;
-        border-radius: 0.6rem;
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-      }
-      button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(0, 177, 79, 0.2);
-      }
-
-      #statusMessage {
-        font-size: 0.9rem;
-        font-weight: 600;
-        text-align: center;
-        min-height: 1.2em;
-      }
-      .success {
-        color: #10b981;
-      }
-      .error {
-        color: #ef4444;
-      }
-
-      @media (max-width: 400px) {
-        .glass {
-          max-width: 80%;
-          padding: 1.5rem 1rem;
-        }
-        h1 {
-          font-size: 1.4rem;
-        }
-        button {
-          font-size: 1rem;
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="index.css" />
   </head>
   <body>
-    <!DOCTYPE html>
-    <html lang="ja">
-      <head>
-        <meta charset="UTF-8" />
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-        />
-        <title>プロドライバー弁当申請</title>
-        <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
-          rel="stylesheet"
-        />
-        <link rel="stylesheet" href="index.css" />
-      </head>
-      <body>
-        <div class="wrapper">
-          <div id="registrationSection" class="glass">
-            <h1>情報登録フォーム</h1>
-            <p class="subtitle">お名前と社員番号を入力してください</p>
-            <label for="nameInput">お名前</label>
-            <input type="text" id="nameInput" placeholder="例：山田 太郎" />
-            <label for="employeeIdInput">社員番号</label>
-            <input type="text" id="employeeIdInput" placeholder="例：12345" />
-            <button id="submitButton">登録して進む</button>
-            <div id="statusMessage"></div>
-          </div>
-
-          <div id="purchaseSection" class="glass" style="display: none">
-            <h1>お弁当注文</h1>
-            <p class="subtitle">
-              こんにちは、<span id="userNameDisplay"></span> さん！
-            </p>
-            <p>購入したいお弁当を選んでください。</p>
-
-            <div class="bento-option">
-              <span>日替わり弁当 (500円)</span>
-              <button class="purchase-button" data-bento-name="日替わり弁当">
-                購入
-              </button>
-            </div>
-            <div class="bento-option">
-              <span>唐揚げ弁当 (550円)</span>
-              <button class="purchase-button" data-bento-name="唐揚げ弁当">
-                購入
-              </button>
-            </div>
-
-            <div id="purchaseStatus"></div>
-            <button id="logoutButton">情報を再入力する</button>
-          </div>
-        </div>
-
-        <script src="index.js"></script>
-      </body>
-    </html>
     <div class="wrapper">
-      <div class="glass">
+      <div id="registrationSection" class="glass">
         <h1>情報登録フォーム</h1>
         <p class="subtitle">お名前と社員番号を入力してください</p>
-
         <label for="nameInput">お名前</label>
         <input type="text" id="nameInput" placeholder="例：山田 太郎" />
-
         <label for="employeeIdInput">社員番号</label>
         <input type="text" id="employeeIdInput" placeholder="例：12345" />
-
-        <button id="submitButton">送信</button>
+        <button id="submitButton">登録して進む</button>
         <div id="statusMessage"></div>
+      </div>
+
+      <div id="purchaseSection" class="glass" style="display: none">
+        <h1>お弁当注文</h1>
+        <p class="subtitle">
+          こんにちは、<span id="userNameDisplay"></span> さん！
+        </p>
+        <p>購入したいお弁当を選んでください。</p>
+
+        <div class="bento-option">
+          <span>日替わり弁当 (500円)</span>
+          <button class="purchase-button" data-bento-name="日替わり弁当">
+            購入
+          </button>
+        </div>
+        <div class="bento-option">
+          <span>唐揚げ弁当 (550円)</span>
+          <button class="purchase-button" data-bento-name="唐揚げ弁当">
+            購入
+          </button>
+        </div>
+
+        <div id="purchaseStatus"></div>
+        <button id="logoutButton">情報を再入力する</button>
+      </div>
+
+      <div id="completeSection" class="glass" style="display: none">
+        <h1>✅ ご購入ありがとうございました！</h1>
+        <p class="subtitle">店舗側で注文が確認されました。</p>
+        <button id="backToPurchaseButton">続けて購入する</button>
       </div>
     </div>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const liffId = "2007755942-oQ4lzEn9";
-        liff
-          .init({ liffId })
-          .then(() => console.log("✅ LIFF OK"))
-          .catch((e) => console.error(e));
-
-        const ni = document.getElementById("nameInput"),
-          ei = document.getElementById("employeeIdInput"),
-          btn = document.getElementById("submitButton"),
-          msg = document.getElementById("statusMessage"),
-          url =
-            "https://script.google.com/macros/s/AKfycbwv7QqlYbC870ssiOsMYljs1ZsLRyM03mBWpixSBTAp_SrHbtFLHBYHANojlBdQ2qf5JQ/exec";
-
-        // --- 修正点①：ページ読み込み時にlocalStorageから情報を読み込む ---
-        const savedName = localStorage.getItem("userName");
-        const savedId = localStorage.getItem("employeeId");
-        if (savedName) {
-          ni.value = savedName;
-        }
-        if (savedId) {
-          ei.value = savedId;
-        }
-        // ---------------------------------------------------------
-
-        btn.addEventListener("click", () => {
-          const name = ni.value.trim(),
-            id = ei.value.trim();
-          if (!name || !id) {
-            msg.textContent = "⚠️ 入力が不足しています";
-            msg.className = "error";
-            return;
-          }
-          msg.textContent = "📡 送信中...";
-          msg.className = "";
-          fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: JSON.stringify({ name, employeeId: id }),
-          })
-            .then((r) => {
-              if (!r.ok) throw new Error(r.status);
-              return r.json();
-            })
-            .then((d) => {
-              if (d.result === "success") {
-                // --- 修正点②：送信成功時にlocalStorageへ保存 ---
-                localStorage.setItem("userName", name);
-                localStorage.setItem("employeeId", id);
-
-                msg.textContent = "✅ 送信完了！";
-                msg.className = "success";
-                // ------------------------------------------------
-              } else {
-                msg.textContent = "⚠️ サーバーエラーが発生しました";
-                msg.className = "error";
-              }
-            })
-            .catch((e) => {
-              console.error(e);
-              msg.textContent = "❌ 通信エラーが発生しました";
-              msg.className = "error";
-            });
-        });
-      });
-    </script>
+    <script src="index.js" defer></script>
   </body>
 </html>
