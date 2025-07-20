@@ -137,7 +137,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // ログアウト（情報削除）ボタンの処理
   logoutButton.addEventListener("click", () => {
-    if (confirm("記憶した情報を削除して、入力画面に戻りますか？")) {
+    if (confirm("記憶した情報を削除して、情報入力画面に戻りますか？")) {
       localStorage.removeItem("userName");
       localStorage.removeItem("employeeId");
       showPage("registration");
