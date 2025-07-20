@@ -180,6 +180,17 @@
           url =
             "https://script.google.com/macros/s/AKfycbwv7QqlYbC870ssiOsMYljs1ZsLRyM03mBWpixSBTAp_SrHbtFLHBYHANojlBdQ2qf5JQ/exec";
 
+        // --- 修正点①：ページ読み込み時にlocalStorageから情報を読み込む ---
+        const savedName = localStorage.getItem("userName");
+        const savedId = localStorage.getItem("employeeId");
+        if (savedName) {
+          ni.value = savedName;
+        }
+        if (savedId) {
+          ei.value = savedId;
+        }
+        // ---------------------------------------------------------
+
         btn.addEventListener("click", () => {
           const name = ni.value.trim(),
             id = ei.value.trim();
@@ -201,10 +212,13 @@
             })
             .then((d) => {
               if (d.result === "success") {
-                msg.textContent = "✅ 送信完了しました！";
+                // --- 修正点②：送信成功時にlocalStorageへ保存 ---
+                localStorage.setItem("userName", name);
+                localStorage.setItem("employeeId", id);
+
+                msg.textContent = "✅ 送信完了！情報を記憶しました。";
                 msg.className = "success";
-                ni.value = "";
-                ei.value = "";
+                // ------------------------------------------------
               } else {
                 msg.textContent = "⚠️ サーバーエラーが発生しました";
                 msg.className = "error";

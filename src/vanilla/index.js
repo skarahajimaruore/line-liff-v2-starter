@@ -24,6 +24,17 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
+  // --- 修正点①：localStorageから保存された情報を読み込む ---
+  const savedName = localStorage.getItem("userName");
+  const savedId = localStorage.getItem("employeeId");
+  if (savedName) {
+    nameInput.value = savedName;
+  }
+  if (savedId) {
+    employeeIdInput.value = savedId;
+  }
+  // ----------------------------------------------------
+
   const gasWebAppUrl =
     "https://script.google.com/macros/s/AKfycbwv7QqlYbC870ssiOsMYljs1ZsLRyM03mBWpixSBTAp_SrHbtFLHBYHANojlBdQ2qf5JQ/exec";
 
@@ -68,10 +79,14 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((data) => {
         console.log("📦 レスポンス:", data);
         if (data.result === "success") {
-          statusMessage.textContent = "送信が完了しました！";
+          // --- 修正点②：送信成功時にlocalStorageへ情報を保存 ---
+          localStorage.setItem("userName", name);
+          localStorage.setItem("employeeId", employeeId);
+
+          statusMessage.textContent = "送信完了！次回から入力不要です。";
           statusMessage.style.color = "green";
-          nameInput.value = "";
-          employeeIdInput.value = "";
+          // ---------------------------------------------------
+
           console.log("✅ スプレッドシートに記録完了！");
           console.log("📝 スプレッドシートを確認: " + spreadsheetUrl);
         } else {
@@ -82,8 +97,8 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .catch((error) => {
         console.error("❌ 通信エラー:", error);
-        statusMessage.textContent = "お待ちください…";
-        statusMessage.style.color = "gray";
+        statusMessage.textContent = "通信エラーが発生しました。";
+        statusMessage.style.color = "red";
       });
   });
 });
