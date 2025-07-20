@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const backToPurchaseButton = document.getElementById("backToPurchaseButton");
 
   const gasWebAppUrl =
-    "https://script.google.com/macros/s/AKfycbySXTpxp3FWR0INFXb1cBhi3W-3gwEfHDbtpWGhd3Ubv6wsf2u3bjnWfxoqmjNDn0krag/exec"; // あなたのGASのURL
+    "https://script.google.com/macros/s/AKfycbw1KJFJVZXIq_T3oepqsa3LOTvLU5-M2epHs-IO__hQwq-x7nSxu_Xx1Q3_u5ZJ4q8E3A/exec"; // あなたのGASのURL
 
   // ===== 関数定義 =====
 
@@ -44,22 +44,49 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // ===== イベントリスナー =====
 
-  // 登録ボタンの処理
+  // 登録ボタンの処理 (★修正箇所)
   submitButton.addEventListener("click", () => {
     const name = nameInput.value.trim();
     const employeeId = employeeIdInput.value.trim();
+
     if (!name || !employeeId) {
       statusMessage.textContent = "名前と社員番号を入力してください。";
       statusMessage.className = "error";
       return;
     }
-    localStorage.setItem("userName", name);
-    localStorage.setItem("employeeId", employeeId);
-    statusMessage.textContent = "✅ 情報を記憶しました！";
-    statusMessage.className = "success";
-    setTimeout(() => {
-      showPage("purchase");
-    }, 500);
+
+    statusMessage.textContent = "📡 登録中...";
+    statusMessage.className = "";
+
+    const postData = { name, employeeId, action: "register" };
+
+    fetch(gasWebAppUrl, {
+      method: "POST",
+      body: JSON.stringify(postData),
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("サーバー応答エラー");
+        return response.json();
+      })
+      .then((data) => {
+        if (data.result === "success") {
+          localStorage.setItem("userName", name);
+          localStorage.setItem("employeeId", employeeId);
+          statusMessage.textContent = "✅ 登録完了！";
+          statusMessage.className = "success";
+          setTimeout(() => {
+            showPage("purchase");
+          }, 500);
+        } else {
+          throw new Error(data.message || "サーバー側エラー");
+        }
+      })
+      .catch((error) => {
+        console.error("❌ 登録エラー:", error);
+        statusMessage.textContent = "登録に失敗しました。";
+        statusMessage.className = "error";
+      });
   });
 
   // 購入ボタン（複数）の処理
@@ -87,7 +114,6 @@ document.addEventListener("DOMContentLoaded", function () {
       })
         .then((response) => {
           if (!response.ok) {
-            // レスポンスがOKでない場合、エラーとして処理
             throw new Error("サーバーからの応答エラー");
           }
           return response.json();
@@ -98,7 +124,6 @@ document.addEventListener("DOMContentLoaded", function () {
             purchaseStatus.textContent = "";
             showPage("complete");
           } else {
-            // GAS側でエラーが返された場合
             throw new Error(data.message || "サーバー側でエラーが発生しました");
           }
         })
