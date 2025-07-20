@@ -13,14 +13,170 @@
       rel="stylesheet"
     />
     <style>
-      /* （先ほどと同じ CSS をここにペースト） */
-      /* body, .wrapper, .glass, input, button など */
-      /* 略 */
+      /* リセット */
+      html {
+        box-sizing: border-box;
+        height: 100%;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: inherit;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: "Inter", sans-serif;
+        background: linear-gradient(135deg, #e0f7f3, #f5fdfb);
+      }
+
+      /* 中央ラッパー */
+      .wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100%;
+        padding: 1rem;
+      }
+
+      /* カード共通 */
+      .glass {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-radius: 1.25rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        padding: 2rem 1.5rem;
+        width: 100%;
+        max-width: 340px;
+        animation: fadeIn 0.5s ease-in-out;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 1.6rem;
+        font-weight: 700;
+        text-align: center;
+        color: #1f2937;
+      }
+      .subtitle {
+        margin: 0 0 1rem;
+        font-size: 0.9rem;
+        text-align: center;
+        color: #6b7280;
+        line-height: 1.5;
+      }
+
+      label {
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #374151;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        padding: 0.9rem 1rem;
+        font-size: 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.6rem;
+        background: #fff;
+        transition: border 0.2s, box-shadow 0.2s;
+      }
+      input[type="text"]:focus {
+        border-color: #06c755;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(6, 199, 85, 0.2);
+      }
+
+      button {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #fff;
+        background: linear-gradient(to right, #06c755, #00b14f);
+        border: none;
+        border-radius: 0.6rem;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 177, 79, 0.2);
+      }
+
+      #statusMessage,
+      #purchaseStatus {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-align: center;
+        min-height: 1.2em;
+      }
+      .success {
+        color: #10b981;
+      }
+      .error {
+        color: #ef4444;
+      }
+
+      /* 購入ページの追加スタイル */
+      .purchase-button {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        background: linear-gradient(to right, #2563eb, #1d4ed8);
+        color: #fff;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+      }
+
+      /* ログアウト／続けて購入ボタン */
+      #logoutButton,
+      #backToPurchaseButton {
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        background: linear-gradient(to right, #6b7280, #4b5563);
+        color: #fff;
+        border: none;
+        border-radius: 0.6rem;
+        cursor: pointer;
+        padding: 0.8rem;
+      }
+
+      @media (max-width: 400px) {
+        .glass {
+          max-width: 80%;
+          padding: 1.5rem 1rem;
+        }
+        h1 {
+          font-size: 1.4rem;
+        }
+        button {
+          font-size: 1rem;
+        }
+      }
     </style>
   </head>
   <body>
     <div class="wrapper">
-      <!-- 1. 登録フォーム（registrationSection） -->
+      <!-- 1. 登録フォーム -->
       <section id="registrationSection" class="glass">
         <h1>情報登録フォーム</h1>
         <p class="subtitle">お名前と社員番号を入力してください</p>
@@ -32,7 +188,7 @@
         <div id="statusMessage"></div>
       </section>
 
-      <!-- 2. 購入ページ（purchaseSection） -->
+      <!-- 2. 購入ページ -->
       <section
         id="purchaseSection"
         class="glass"
@@ -52,15 +208,10 @@
           のり弁当
         </button>
         <div id="purchaseStatus"></div>
-        <button
-          id="logoutButton"
-          style="background: #ddd; color: #333; margin-top: 1rem"
-        >
-          登録情報を消して戻る
-        </button>
+        <button id="logoutButton">登録情報を消して戻る</button>
       </section>
 
-      <!-- 3. 完了画面（completeSection） -->
+      <!-- 3. 完了画面 -->
       <section
         id="completeSection"
         class="glass"
@@ -74,14 +225,14 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        // ===== LIFF 初期化 =====
+        // LIFF 初期化
         const liffId = "2007755942-oQ4lzEn9";
         liff
           .init({ liffId })
           .then(() => console.log("✅ LIFF OK"))
           .catch((e) => console.error("❌ LIFF NG", e));
 
-        // ===== 要素取得 =====
+        // 要素取得
         const registrationSection = document.getElementById(
           "registrationSection"
         );
@@ -102,7 +253,7 @@
         const GAS_URL =
           "https://script.google.com/macros/s/＜あなたのGAS_URL＞/exec";
 
-        /** ページ切り替え **/
+        // ページ切り替え
         function showPage(page) {
           registrationSection.style.display = "none";
           purchaseSection.style.display = "none";
@@ -117,14 +268,14 @@
           }
         }
 
-        // 初回ロード時
+        // 初期表示
         if (localStorage.getItem("employeeId")) {
           showPage("purchase");
         } else {
           showPage("registration");
         }
 
-        // ===== 登録処理 =====
+        // 登録処理
         submitButton.addEventListener("click", () => {
           const name = nameInput.value.trim();
           const employeeId = employeeIdInput.value.trim();
@@ -163,7 +314,7 @@
             });
         });
 
-        // ===== 購入処理 =====
+        // 購入処理
         purchaseButtons.forEach((btn) =>
           btn.addEventListener("click", () => {
             const bentoName = btn.dataset.bentoName;
@@ -196,13 +347,13 @@
           })
         );
 
-        // ===== ログアウト =====
+        // ログアウト
         logoutButton.addEventListener("click", () => {
           localStorage.clear();
           showPage("registration");
         });
 
-        // ===== 続けて購入 =====
+        // 続けて購入
         backToPurchaseButton.addEventListener("click", () => {
           showPage("purchase");
         });
