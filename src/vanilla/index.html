@@ -149,6 +149,63 @@
     </style>
   </head>
   <body>
+    <!DOCTYPE html>
+    <html lang="ja">
+      <head>
+        <meta charset="UTF-8" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+        />
+        <title>プロドライバー弁当申請</title>
+        <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+          rel="stylesheet"
+        />
+        <link rel="stylesheet" href="index.css" />
+      </head>
+      <body>
+        <div class="wrapper">
+          <div id="registrationSection" class="glass">
+            <h1>情報登録フォーム</h1>
+            <p class="subtitle">お名前と社員番号を入力してください</p>
+            <label for="nameInput">お名前</label>
+            <input type="text" id="nameInput" placeholder="例：山田 太郎" />
+            <label for="employeeIdInput">社員番号</label>
+            <input type="text" id="employeeIdInput" placeholder="例：12345" />
+            <button id="submitButton">登録して進む</button>
+            <div id="statusMessage"></div>
+          </div>
+
+          <div id="purchaseSection" class="glass" style="display: none">
+            <h1>お弁当注文</h1>
+            <p class="subtitle">
+              こんにちは、<span id="userNameDisplay"></span> さん！
+            </p>
+            <p>購入したいお弁当を選んでください。</p>
+
+            <div class="bento-option">
+              <span>日替わり弁当 (500円)</span>
+              <button class="purchase-button" data-bento-name="日替わり弁当">
+                購入
+              </button>
+            </div>
+            <div class="bento-option">
+              <span>唐揚げ弁当 (550円)</span>
+              <button class="purchase-button" data-bento-name="唐揚げ弁当">
+                購入
+              </button>
+            </div>
+
+            <div id="purchaseStatus"></div>
+            <button id="logoutButton">情報を再入力する</button>
+          </div>
+        </div>
+
+        <script src="index.js"></script>
+      </body>
+    </html>
     <div class="wrapper">
       <div class="glass">
         <h1>情報登録フォーム</h1>

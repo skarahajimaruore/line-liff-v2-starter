@@ -1,5 +1,7 @@
-html, body {
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+html,
+body {
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
   margin: 0;
   padding: 0;
 }
@@ -88,13 +90,14 @@ html, body {
   line-height: 1.5;
   border-radius: 2px;
   text-decoration: none;
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .button--primary {
   color: #fff;
-  background-color: #00B900;
-  border-color: #00B900;
+  background-color: #00b900;
+  border-color: #00b900;
 }
 
 .button--primary:hover {
@@ -124,7 +127,7 @@ html, body {
 
 .button--tertiary:hover {
   color: #353a40;
-  background-color: rgba(53,58,64,0.1);
+  background-color: rgba(53, 58, 64, 0.1);
   border-color: #353a40;
 }
 
@@ -147,4 +150,29 @@ html, body {
   .home__buttons {
     flex-direction: column;
   }
+}
+/* index.css の末尾に追加 */
+
+.bento-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.purchase-button {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  background: #2563eb; /* 青色に変更 */
+  background: linear-gradient(to right, #2563eb, #1d4ed8);
+}
+
+#logoutButton {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  background: #6b7280; /* グレーに変更 */
+  background: linear-gradient(to right, #6b7280, #4b5563);
 }
