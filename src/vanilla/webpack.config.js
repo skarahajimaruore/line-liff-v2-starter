@@ -12,7 +12,7 @@ const commonConfig = {
 
   devServer: {
     static: {
-      directory: path.join(__dirname, "public"),
+      directory: path.join(__dirname, "src/vanilla"),
       watch: true,
     },
     port: 3000,
@@ -53,15 +53,15 @@ const commonConfig = {
 
 const vanillaConfig = merge(commonConfig, {
   name: "vanilla",
-  entry: path.resolve(__dirname, "src/vanilla/index.js"),
+  entry: path.resolve(__dirname, "src/vanilla/index.js"), // ✅ 明示的に絶対パスで指定
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "[name].bundle.js",
+    filename: "main.bundle.js",
     publicPath: "/",
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, "src/vanilla/index.html"),
+      template: path.resolve(__dirname, "src/vanilla/index.html"), // ✅ こちらも同様
     }),
   ],
 });
