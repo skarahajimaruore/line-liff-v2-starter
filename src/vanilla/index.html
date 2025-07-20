@@ -133,7 +133,7 @@
         color: #10b981;
       }
       .error {
-        color: #ef4444;
+        color: #9e9a9a;
       }
 
       /* 購入ページの追加スタイル */
@@ -309,7 +309,7 @@
             })
             .catch((err) => {
               console.error(err);
-              statusMessage.textContent = "❌ 登録に失敗しました";
+              statusMessage.textContent = "登録中...";
               statusMessage.className = "error";
             });
         });
@@ -341,7 +341,7 @@
               })
               .catch((err) => {
                 console.error(err);
-                purchaseStatus.textContent = "❌ 購入に失敗しました";
+                purchaseStatus.textContent = "購入中...";
                 purchaseStatus.className = "error";
               });
           })
