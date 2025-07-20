@@ -2,7 +2,10 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <title>プロドライバー弁当申請</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <link
@@ -10,27 +13,34 @@
       rel="stylesheet"
     />
     <style>
+      /* 基本リセット・ボックスサイズ統一 */
       html {
         box-sizing: border-box;
+        height: 100%;
       }
-
       *,
       *::before,
       *::after {
         box-sizing: inherit;
       }
-
       body {
         margin: 0;
+        padding: 0;
+        height: 100%;
         font-family: "Inter", sans-serif;
         background: linear-gradient(135deg, #e0f7f3, #f5fdfb);
+      }
+
+      /* 中央揃えラッパー */
+      .wrapper {
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 100vh;
-        padding: 1rem;
+        min-height: 100%;
+        padding: 1rem; /* 小さい余白だけ確保 */
       }
 
+      /* ガラスモーフィズムカード */
       .glass {
         background: rgba(255, 255, 255, 0.75);
         backdrop-filter: blur(16px);
@@ -39,10 +49,9 @@
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
         padding: 2.5rem 2rem;
         width: 100%;
-        max-width: 460px;
+        max-width: 480px; /* 入力欄とボタンの幅を揃える最大値 */
         animation: fadeIn 0.6s ease-in-out;
       }
-
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -58,7 +67,7 @@
         font-size: 1.75rem;
         font-weight: 700;
         text-align: center;
-        margin-bottom: 0.5rem;
+        margin: 0 0 0.5rem;
         color: #1f2937;
       }
 
@@ -66,25 +75,26 @@
         text-align: center;
         color: #6b7280;
         font-size: 0.95rem;
-        margin-bottom: 1.8rem;
+        margin: 0 0 1.8rem;
         line-height: 1.6;
       }
 
       label {
+        display: block;
         font-weight: 600;
         font-size: 0.95rem;
-        margin-bottom: 0.5rem;
-        display: block;
+        margin: 0 0 0.5rem;
         color: #374151;
       }
 
       input[type="text"] {
+        display: block;
         width: 100%;
         padding: 1rem;
+        font-size: 1.05rem;
         border: 1px solid #d1d5db;
         border-radius: 0.6rem;
-        font-size: 1.05rem;
-        margin-bottom: 1.5rem;
+        margin: 0 0 1.5rem;
         background-color: #fff;
         transition: border 0.2s, box-shadow 0.2s;
       }
@@ -96,17 +106,18 @@
       }
 
       button {
+        display: block;
         width: 100%;
         padding: 1rem;
         font-size: 1.1rem;
         font-weight: 600;
+        color: #fff;
         background: linear-gradient(to right, #06c755, #00b14f);
-        color: white;
         border: none;
         border-radius: 0.6rem;
         cursor: pointer;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
-        margin-top: 1rem;
+        margin-top: 1.5rem; /* 送信ボタンを下に余裕を持たせる */
       }
 
       button:hover {
@@ -115,7 +126,7 @@
       }
 
       #statusMessage {
-        margin-top: 1.5rem;
+        margin: 1.5rem 0 0;
         text-align: center;
         font-weight: 600;
         font-size: 0.95rem;
@@ -132,13 +143,11 @@
 
       @media (max-width: 480px) {
         .glass {
-          padding: 1.5rem;
+          padding: 1.5rem 1rem;
         }
-
         h1 {
           font-size: 1.4rem;
         }
-
         button {
           font-size: 1rem;
         }
@@ -146,18 +155,20 @@
     </style>
   </head>
   <body>
-    <div class="glass">
-      <h1>情報登録フォーム</h1>
-      <p class="subtitle">お名前と社員番号を入力してください</p>
+    <div class="wrapper">
+      <div class="glass">
+        <h1>情報登録フォーム</h1>
+        <p class="subtitle">お名前と社員番号を入力してください</p>
 
-      <label for="nameInput">お名前</label>
-      <input type="text" id="nameInput" placeholder="例：山田 太郎" />
+        <label for="nameInput">お名前</label>
+        <input type="text" id="nameInput" placeholder="例：山田 太郎" />
 
-      <label for="employeeIdInput">社員番号</label>
-      <input type="text" id="employeeIdInput" placeholder="例：12345" />
+        <label for="employeeIdInput">社員番号</label>
+        <input type="text" id="employeeIdInput" placeholder="例：12345" />
 
-      <button id="submitButton">送信</button>
-      <div id="statusMessage"></div>
+        <button id="submitButton">送信</button>
+        <div id="statusMessage"></div>
+      </div>
     </div>
 
     <script>
@@ -191,7 +202,9 @@
 
           fetch(gasUrl, {
             method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
             body: JSON.stringify({ name, employeeId }),
           })
             .then((res) => {
