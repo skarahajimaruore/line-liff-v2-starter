@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (res.result !== "success") throw new Error(res.message);
         // ステータス列を書き換え
         btn.closest("tr").children[4].textContent = "提供済み";
-        btn.remove(); // ボタンを消す
+        btn.remove(); // ボタン
       })
       .catch((err) => {
         errorEl.textContent = "更新失敗: " + err.message;
