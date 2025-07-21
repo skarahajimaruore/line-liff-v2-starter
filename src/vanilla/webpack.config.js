@@ -42,7 +42,7 @@ module.exports = {
     }),
     // 2. 管理ページ用のHTMLを生成
     new HtmlWebpackPlugin({
-      template: "./src/admin/admin.html", // テンプレートとなるHTML
+      template: "./src/admin/admin.html", // テンプレートHTML
       filename: "admin.html", // 出力されるファイル名
       chunks: ["admin"], // 読み込むJSファイル (admin.bundle.js)
     }),
