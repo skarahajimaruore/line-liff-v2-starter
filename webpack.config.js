@@ -55,7 +55,7 @@ module.exports = {
     // ② 利用者画面用 HTML を吐き出す
     new HtmlWebpackPlugin({
       filename: "index.html", // 出力先
-      template: path.resolve(__dirname, "src/vanilla/index.html"), // テンプレートだ
+      template: path.resolve(__dirname, "src/vanilla/index.html"), // テンプレート
       chunks: ["main"], // これらの JS/CSS を埋め込む
     }),
 
