@@ -1,59 +1,76 @@
+// webpack.config.js
 const path = require("path");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
+const isDev = process.env.NODE_ENV !== "production";
+
 module.exports = {
-  // どのJSファイルをビルドの起点にするか設定
+  // 開発／本番モード切り替え
+  mode: isDev ? "development" : "production",
+
+  // ① マルチエントリポイント定義
   entry: {
-    main: "./src/index.js", // 利用者ページのJS
-    admin: "./src/admin/admin.js", // 管理ページのJS
+    // 利用者アプリ側
+    main: path.resolve(__dirname, "src/vanilla/index.js"),
+    // 管理画面側
+    admin: path.resolve(__dirname, "src/admin/admin.js"),
   },
 
-  // ビルド結果をどのフォルダに、どういう名前で出力するか設定
+  // 出力設定
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "[name].bundle.js", // main.bundle.js と admin.bundle.js が生成される
-    clean: true, // ビルド前にdistフォルダを綺麗にする
+    // dist/main/bundle.js, dist/admin/bundle.js と出力される
+    filename: "[name]/bundle.js",
+    // HTML から相対パスで参照できるように
+    publicPath: "./",
   },
 
   module: {
-    // JSファイルやCSSファイルをどう処理するか設定
     rules: [
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: "babel-loader",
-        },
-      },
+      // CSS ローダー
       {
         test: /\.css$/,
-        use: ["style-loader", "css-loader"],
+        use: [
+          isDev ? "style-loader" : MiniCssExtractPlugin.loader,
+          "css-loader",
+        ],
+      },
+      // JS/JSX → Babel でトランスパイル
+      {
+        test: /\.(js|jsx)$/,
+        exclude: /node_modules/,
+        use: "babel-loader",
       },
     ],
   },
 
-  // プラグインの設定
   plugins: [
-    // 1. 利用者ページ用のHTMLを生成
-    new HtmlWebpackPlugin({
-      template: "./src/index.html", // テンプレートとなるHTML
-      filename: "index.html", // 出力されるファイル名
-      chunks: ["main"], // 読み込むJSファイル (main.bundle.js)
+    // CSS を separate file に抽出
+    new MiniCssExtractPlugin({
+      // dist/main/styles.css, dist/admin/styles.css
+      filename: "[name]/styles.css",
     }),
-    // 2. 管理ページ用のHTMLを生成
+
+    // ② 利用者画面用 HTML を吐き出す
     new HtmlWebpackPlugin({
-      template: "./src/admin/admin.html", // テンプレートHTML
-      filename: "admin.html", // 出力されるファイル名
-      chunks: ["admin"], // 読み込むJSファイル (admin.bundle.js)
+      filename: "index.html", // 出力先
+      template: path.resolve(__dirname, "src/vanilla/index.html"), // テンプレート
+      chunks: ["main"], // これらの JS/CSS を埋め込む
+    }),
+
+    // ③ 管理画面用 HTML を吐き出す
+    new HtmlWebpackPlugin({
+      filename: "admin/index.html",
+      template: path.resolve(__dirname, "src/admin/admin.html"),
+      chunks: ["admin"],
     }),
   ],
 
-  // 開発用サーバーの設定
+  // ローカル開発用サーバー
   devServer: {
-    static: {
-      directory: path.join(__dirname, "dist"),
-    },
-    compress: true,
-    port: 9000,
+    static: path.resolve(__dirname, "dist"),
+    hot: true,
+    port: 3000,
   },
 };
