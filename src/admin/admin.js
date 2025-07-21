@@ -1,6 +1,7 @@
 // 管理画面用JS
 document.addEventListener("DOMContentLoaded", () => {
-  const GAS_URL = "https://script.google.com/macros/s/＜あなたのGAS_URL＞/exec";
+  const GAS_URL =
+    "https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbzBFGLZaEJ_UZHJvx-LLxZ2EQKWWLTE1se1B1e-qNw_Kt6kX_JF3ilflG28WFQtpLp0bg/exec/exec";
   const tbody = document.getElementById("orderTableBody");
   const errorEl = document.getElementById("errorMsg");
 

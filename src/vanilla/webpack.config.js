@@ -1,90 +1,59 @@
 const path = require("path");
-const webpack = require("webpack");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const Dotenv = require("dotenv-webpack");
 
-const env = process.env.NODE_ENV || "production";
-const isDev = env === "development";
-
-// 共通設定
-const common = {
-  mode: env,
-  resolve: {
-    fallback: { crypto: false },
+module.exports = {
+  // どのJSファイルをビルドの起点にするか設定
+  entry: {
+    main: "./src/index.js", // 利用者ページのJS
+    admin: "./src/admin/admin.js", // 管理ページのJS
   },
+
+  // ビルド結果をどのフォルダに、どういう名前で出力するか設定
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name].bundle.js", // main.bundle.js と admin.bundle.js が生成される
+    clean: true, // ビルド前にdistフォルダを綺麗にする
+  },
+
   module: {
+    // JSファイルやCSSファイルをどう処理するか設定
     rules: [
       {
-        test: /\.(js|jsx)$/,
+        test: /\.js$/,
         exclude: /node_modules/,
-        use: "babel-loader",
+        use: {
+          loader: "babel-loader",
+        },
       },
       {
         test: /\.css$/,
-        use: [
-          isDev ? "style-loader" : MiniCssExtractPlugin.loader,
-          "css-loader",
-        ],
+        use: ["style-loader", "css-loader"],
       },
     ],
   },
-  plugins: [
-    new Dotenv({ systemvars: true }),
-    new webpack.HotModuleReplacementPlugin(),
-    new MiniCssExtractPlugin({
-      filename: "[name].css",
-      chunkFilename: "[id].css",
-    }),
-  ],
-};
 
-// ── 利用者アプリ（vanilla）設定 ──
-const vanillaConfig = {
-  ...common,
-  name: "vanilla",
-  entry: path.resolve(__dirname, "src/vanilla/index.js"),
-  output: {
-    path: path.resolve(__dirname, "dist/vanilla"),
-    filename: "bundle.js",
-    publicPath: "/vanilla/",
-  },
+  // プラグインの設定
   plugins: [
-    ...common.plugins,
+    // 1. 利用者ページ用のHTMLを生成
     new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, "src/vanilla/index.html"),
-      filename: "index.html",
+      template: "./src/index.html", // テンプレートとなるHTML
+      filename: "index.html", // 出力されるファイル名
+      chunks: ["main"], // 読み込むJSファイル (main.bundle.js)
+    }),
+    // 2. 管理ページ用のHTMLを生成
+    new HtmlWebpackPlugin({
+      template: "./src/admin/admin.html", // テンプレートとなるHTML
+      filename: "admin.html", // 出力されるファイル名
+      chunks: ["admin"], // 読み込むJSファイル (admin.bundle.js)
     }),
   ],
-  // ローカル開発用サーバーは vanilla のみ
+
+  // 開発用サーバーの設定
   devServer: {
     static: {
-      directory: path.resolve(__dirname, "dist/vanilla"),
-      watch: true,
+      directory: path.join(__dirname, "dist"),
     },
-    port: 3000,
-    hot: true,
+    compress: true,
+    port: 9000,
   },
 };
-
-// ── 管理画面アプリ（admin）設定 ──
-const adminConfig = {
-  ...common,
-  name: "admin",
-  entry: path.resolve(__dirname, "src/admin/admin.js"),
-  output: {
-    path: path.resolve(__dirname, "dist/admin"),
-    filename: "bundle.js",
-    publicPath: "/admin/",
-  },
-  plugins: [
-    ...common.plugins,
-    new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, "src/admin/admin.html"),
-      filename: "index.html",
-    }),
-  ],
-  // 管理画面も devServer で動かしたい場合はポートを変えるなど調整してください
-};
-
-module.exports = [vanillaConfig, adminConfig];
