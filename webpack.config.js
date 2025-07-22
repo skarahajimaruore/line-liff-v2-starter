@@ -1,26 +1,27 @@
 const path = require("path");
-const webpack = require("webpack");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const Dotenv = require("dotenv-webpack");
-
-const isDev = process.env.NODE_ENV !== "production";
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
-  mode: isDev ? "development" : "production",
+  mode: "production",
 
+  // エントリーポイント（入力ファイル）
   entry: {
-    vanilla: "./src/vanilla/index.js",
+    // 利用者ページ用JS
+    main: "./src/vanilla/index.js",
+    // 管理ページ用JS
     admin: "./src/admin/admin.js",
   },
 
+  // 出力設定
   output: {
     path: path.resolve(__dirname, "dist"),
+    // 出力ファイル名 [name]にはentryのキーが入る (main, admin)
     filename: "[name]/bundle.js",
-    publicPath: "/",
-    clean: true,
+    clean: true, // ビルド前にdistフォルダを空にする
   },
 
+  // 各種ファイルの処理ルール
   module: {
     rules: [
       {
@@ -30,44 +31,38 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [
-          isDev ? "style-loader" : MiniCssExtractPlugin.loader,
-          "css-loader",
-        ],
+        use: [MiniCssExtractPlugin.loader, "css-loader"],
       },
     ],
   },
 
+  // プラグイン設定
   plugins: [
-    new Dotenv({ systemvars: true }),
     new MiniCssExtractPlugin({
       filename: "[name]/styles.css",
     }),
 
-    // 利用者ページのHTMLを生成 (★ここを修正★)
+    // 利用者ページのHTMLを生成 (`dist/index.html`)
     new HtmlWebpackPlugin({
       template: "./src/vanilla/index.html",
-      filename: "index.html", // dist/index.html として出力
-      chunks: ["vanilla"],
+      filename: "index.html",
+      chunks: ["main"], // mainのJSとCSSだけを読み込む
     }),
 
-    // 管理ページのHTMLを生成
+    // 管理ページのHTMLを生成 (`dist/admin/index.html`)
     new HtmlWebpackPlugin({
       template: "./src/admin/admin.html",
-      filename: "admin/index.html", // dist/admin/index.html として出力
-      chunks: ["admin"],
+      filename: "admin/index.html",
+      chunks: ["admin"], // adminのJSとCSSだけを読み込む
     }),
-
-    isDev ? new webpack.HotModuleReplacementPlugin() : () => {},
   ],
 
+  // 開発用サーバー（Vercelのデプロイには影響なし）
   devServer: {
-    static: path.join(__dirname, "dist"),
-    hot: true,
-    port: 3000,
-  },
-
-  resolve: {
-    fallback: { crypto: false },
+    static: {
+      directory: path.join(__dirname, "dist"),
+    },
+    compress: true,
+    port: 9000,
   },
 };
