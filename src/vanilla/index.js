@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .catch((error) => {
         // ここに来るのは、ネットワーク接続がないなど、本当の通信エラー
         console.error("❌ 登録エラー:", error);
-        statusMessage.textContent = "登録に失敗しました。";
+        statusMessage.textContent = "登録中...";
         statusMessage.className = "error";
       });
   });
@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
       } catch (error) {
         // ここに来るのは、ネットワーク接続がないなど、本当の通信エラー
         console.error("❌ 購入エラー:", error);
-        purchaseStatus.textContent = "購入に失敗しました。";
+        purchaseStatus.textContent = "購入中...";
         purchaseStatus.className = "error";
       }
     });
