@@ -9,19 +9,16 @@ const isDev = process.env.NODE_ENV !== "production";
 module.exports = {
   mode: isDev ? "development" : "production",
 
-  // 複数エントリーポイントの設定
   entry: {
     vanilla: "./src/vanilla/index.js",
     admin: "./src/admin/admin.js",
   },
 
-  // ★出力先をdistフォルダ1つに統一★
   output: {
     path: path.resolve(__dirname, "dist"),
-    // JSファイル名にディレクトリパスを含める
     filename: "[name]/bundle.js",
     publicPath: "/",
-    clean: true, // ビルド前にdistをクリーンアップ
+    clean: true,
   },
 
   module: {
@@ -44,27 +41,23 @@ module.exports = {
   plugins: [
     new Dotenv({ systemvars: true }),
     new MiniCssExtractPlugin({
-      // CSSファイル名にディレクトリパスを含める
       filename: "[name]/styles.css",
     }),
 
-    // 利用者ページのHTMLを生成
+    // 利用者ページのHTMLを生成 (★ここを修正★)
     new HtmlWebpackPlugin({
       template: "./src/vanilla/index.html",
-      // 出力先をvanillaフォルダに指定
-      filename: "vanilla/index.html",
-      chunks: ["vanilla"], // vanillaのJSとCSSのみ読み込む
+      filename: "index.html", // dist/index.html として出力
+      chunks: ["vanilla"],
     }),
 
     // 管理ページのHTMLを生成
     new HtmlWebpackPlugin({
       template: "./src/admin/admin.html",
-      // 出力先をadminフォルダに指定
-      filename: "admin/index.html",
-      chunks: ["admin"], // adminのJSとCSSのみ読み込む
+      filename: "admin/index.html", // dist/admin/index.html として出力
+      chunks: ["admin"],
     }),
 
-    // 開発サーバー用の設定
     isDev ? new webpack.HotModuleReplacementPlugin() : () => {},
   ],
 
