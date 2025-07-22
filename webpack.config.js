@@ -1,34 +1,36 @@
-// webpack.config.js
 const path = require("path");
+const webpack = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const Dotenv = require("dotenv-webpack");
 
 const isDev = process.env.NODE_ENV !== "production";
 
 module.exports = {
-  // 開発／本番モード切り替え
   mode: isDev ? "development" : "production",
 
-  // ① マルチエントリポイント定義
+  // 複数エントリーポイントの設定
   entry: {
-    // 利用者アプリ側
-    main: path.resolve(__dirname, "src/vanilla/index.js"),
-    // 管理画面側
-    admin: path.resolve(__dirname, "src/admin/admin.js"),
+    vanilla: "./src/vanilla/index.js",
+    admin: "./src/admin/admin.js",
   },
 
-  // 出力設定
+  // ★出力先をdistフォルダ1つに統一★
   output: {
     path: path.resolve(__dirname, "dist"),
-    // dist/main/bundle.js, dist/admin/bundle.js と出力される
+    // JSファイル名にディレクトリパスを含める
     filename: "[name]/bundle.js",
-    // HTML から相対パスで参照できるように
-    publicPath: "./",
+    publicPath: "/",
+    clean: true, // ビルド前にdistをクリーンアップ
   },
 
   module: {
     rules: [
-      // CSS ローダー
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: "babel-loader",
+      },
       {
         test: /\.css$/,
         use: [
@@ -36,41 +38,43 @@ module.exports = {
           "css-loader",
         ],
       },
-      // JS/JSX → Babel でトランスパイル
-      {
-        test: /\.(js|jsx)$/,
-        exclude: /node_modules/,
-        use: "babel-loader",
-      },
     ],
   },
 
   plugins: [
-    // CSS を separate file に抽出
+    new Dotenv({ systemvars: true }),
     new MiniCssExtractPlugin({
-      // dist/main/styles.css, dist/admin/styles.css
+      // CSSファイル名にディレクトリパスを含める
       filename: "[name]/styles.css",
     }),
 
-    // ② 利用者画面用 HTML を吐き出す
+    // 利用者ページのHTMLを生成
     new HtmlWebpackPlugin({
-      filename: "index.html", // 出力先
-      template: path.resolve(__dirname, "src/vanilla/index.html"), // テンプレート
-      chunks: ["main"], // これらの JS/CSS を埋め込む
+      template: "./src/vanilla/index.html",
+      // 出力先をvanillaフォルダに指定
+      filename: "vanilla/index.html",
+      chunks: ["vanilla"], // vanillaのJSとCSSのみ読み込む
     }),
 
-    // ③ 管理画面用 HTML を吐き出す
+    // 管理ページのHTMLを生成
     new HtmlWebpackPlugin({
+      template: "./src/admin/admin.html",
+      // 出力先をadminフォルダに指定
       filename: "admin/index.html",
-      template: path.resolve(__dirname, "src/admin/admin.html"),
-      chunks: ["admin"],
+      chunks: ["admin"], // adminのJSとCSSのみ読み込む
     }),
+
+    // 開発サーバー用の設定
+    isDev ? new webpack.HotModuleReplacementPlugin() : () => {},
   ],
 
-  // ローカル開発用サーバー
   devServer: {
-    static: path.resolve(__dirname, "dist"),
+    static: path.join(__dirname, "dist"),
     hot: true,
     port: 3000,
+  },
+
+  resolve: {
+    fallback: { crypto: false },
   },
 };
