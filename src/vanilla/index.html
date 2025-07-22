@@ -133,7 +133,7 @@
         color: #10b981;
       }
       .error {
-        color: #ef4444;
+        color: #b1acac;
       }
 
       .purchase-button {
@@ -312,7 +312,7 @@
             })
             .catch((err) => {
               console.error("❌ 登録エラー:", err);
-              statusMessage.textContent = "登録に失敗しました";
+              statusMessage.textContent = "登録中...";
               statusMessage.className = "error";
             });
         });
@@ -356,7 +356,7 @@
               })
               .catch((err) => {
                 console.error("❌ 購入エラー:", err);
-                purchaseStatus.textContent = "購入に失敗しました";
+                purchaseStatus.textContent = "購入中...";
                 purchaseStatus.className = "error";
               });
           });
