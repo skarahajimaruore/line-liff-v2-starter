@@ -139,19 +139,40 @@
       .purchase-button:disabled {
         background: #d1d5db;
       }
-
-      /* ★変更点1: CSSのセレクタを修正★ */
       #logoutButton,
       #closeButton {
         margin-top: 1rem;
         font-size: 0.9rem;
         background: linear-gradient(to right, #6b7280, #4b5563);
       }
+      .bento-description {
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #374151;
+        background-color: #f9fafb;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+        line-height: 1.6;
+      }
+
+      /* ★変更点1: ユーザー情報表示用のCSSを追加★ */
+      .userInfoDisplay {
+        font-size: 0.8rem;
+        color: #4b5563;
+        text-align: center;
+        padding: 0.5rem;
+        background-color: rgba(209, 213, 219, 0.5);
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+      }
     </style>
   </head>
   <body>
     <div class="wrapper">
       <section id="registrationSection" class="glass">
+        <div class="userInfoDisplay" style="display: none"></div>
         <h1>情報登録フォーム</h1>
         <p class="subtitle">お名前と社員番号を入力してください</p>
         <label for="nameInput">お名前</label>
@@ -167,10 +188,9 @@
         class="glass"
         style="display: none; flex-direction: column; gap: 1rem"
       >
+        <div class="userInfoDisplay" style="display: none"></div>
         <h1>お弁当の注文</h1>
-        <p class="subtitle">
-          <span id="userNameDisplay"></span>さん、ご注文はこちらから
-        </p>
+        <p class="subtitle">ご注文はこちらから</p>
         <div class="bento-description">
           プロドライバー専用弁当<br />
           ￥300（税込み）
@@ -182,7 +202,7 @@
           購入する
         </button>
         <div id="purchaseStatus"></div>
-        <button id="logoutButton">登録情報（名前・社員番号）の修正</button>
+        <button id="logoutButton">登録情報（名前・社員番号）を修正する</button>
       </section>
 
       <section
@@ -190,6 +210,7 @@
         class="glass"
         style="display: none; text-align: center"
       >
+        <div class="userInfoDisplay" style="display: none"></div>
         <h1>ご注文ありがとうございました！</h1>
         <p class="subtitle">注文が完了しました。</p>
         <button id="closeButton">画面を閉じる</button>
@@ -215,37 +236,57 @@
         const employeeIdInput = document.getElementById("employeeIdInput");
         const submitButton = document.getElementById("submitButton");
         const statusMessage = document.getElementById("statusMessage");
-        const userNameDisplay = document.getElementById("userNameDisplay");
         const logoutButton = document.getElementById("logoutButton");
         const purchaseButtons = document.querySelectorAll(".purchase-button");
         const purchaseStatus = document.getElementById("purchaseStatus");
-        // ★変更点3: 取得するボタンのIDを修正★
         const closeButton = document.getElementById("closeButton");
+        // ★変更点3: ユーザー情報表示エリアを取得★
+        const userInfoDisplays = document.querySelectorAll(".userInfoDisplay");
 
         const GAS_URL =
           "https://script.google.com/macros/s/AKfycbzX_RWe1GTKutM_mnkeXIYCjC_YS6CwrPq6sIYE0LMWgcyV5IwHg7Uc_z9NdEUuD29ASw/exec";
 
-        // (ページ切り替え、初期化、登録・購入ボタンの処理は変更なし)
+        // ★変更点4: ユーザー情報を更新する関数を新設★
+        function updateUserInfoDisplay() {
+          const name = localStorage.getItem("userName");
+          const employeeId = localStorage.getItem("employeeId");
+
+          if (name && employeeId) {
+            userInfoDisplays.forEach((el) => {
+              el.textContent = `社員番号: ${employeeId} | 名前: ${name}`;
+              el.style.display = "block"; // 表示する
+            });
+          } else {
+            userInfoDisplays.forEach((el) => {
+              el.style.display = "none"; // 非表示にする
+            });
+          }
+        }
+
+        // ===== ページ切り替え関数 =====
         function showPage(page) {
           registrationSection.style.display = "none";
           purchaseSection.style.display = "none";
           completeSection.style.display = "none";
           if (page === "purchase") {
-            userNameDisplay.textContent = localStorage.getItem("userName");
             purchaseSection.style.display = "flex";
           } else if (page === "complete") {
             completeSection.style.display = "flex";
           } else {
             registrationSection.style.display = "flex";
           }
+          // ページが切り替わるたびにユーザー情報を更新
+          updateUserInfoDisplay();
         }
 
+        // ===== 初期化 =====
         if (localStorage.getItem("employeeId")) {
           showPage("purchase");
         } else {
           showPage("registration");
         }
 
+        // ===== 登録ボタン =====
         submitButton.addEventListener("click", () => {
           const name = nameInput.value.trim();
           const employeeId = employeeIdInput.value.trim();
@@ -275,6 +316,8 @@
               localStorage.setItem("employeeId", employeeId);
               statusMessage.textContent = "✅ 登録完了！";
               statusMessage.className = "success";
+              // ★変更点5: 成功後にもユーザー情報を更新★
+              updateUserInfoDisplay();
               setTimeout(() => showPage("purchase"), 500);
             })
             .catch((error) => {
@@ -287,6 +330,7 @@
             });
         });
 
+        // ===== 購入ボタン =====
         purchaseButtons.forEach((button) => {
           button.addEventListener("click", async () => {
             if (
@@ -333,16 +377,18 @@
           });
         });
 
+        // ===== ログアウト =====
         logoutButton.addEventListener("click", () => {
           if (confirm("記憶した情報を削除し、登録画面に戻りますか？")) {
             localStorage.removeItem("userName");
             localStorage.removeItem("employeeId");
+            // ユーザー情報を消去
+            updateUserInfoDisplay();
             showPage("registration");
           }
         });
 
-        // ★変更点4: ボタンの動作を修正★
-        // 「続けて購入」ボタンの処理を削除し、「画面を閉じる」ボタンの処理を新設
+        // ===== 画面を閉じるボタン =====
         closeButton.addEventListener("click", () => {
           liff.closeWindow();
         });
