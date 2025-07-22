@@ -13,7 +13,7 @@
       rel="stylesheet"
     />
     <style>
-      /* リセット */
+      /* --- （基本的なCSSは変更なし） --- */
       html {
         box-sizing: border-box;
         height: 100%;
@@ -23,7 +23,6 @@
       *::after {
         box-sizing: inherit;
       }
-
       body {
         margin: 0;
         padding: 0;
@@ -31,8 +30,6 @@
         font-family: "Inter", sans-serif;
         background: linear-gradient(135deg, #e0f7f3, #f5fdfb);
       }
-
-      /* 中央ラッパー */
       .wrapper {
         display: flex;
         align-items: center;
@@ -40,8 +37,6 @@
         min-height: 100%;
         padding: 1rem;
       }
-
-      /* カード */
       .glass {
         display: flex;
         flex-direction: column;
@@ -66,7 +61,6 @@
           transform: translateY(0);
         }
       }
-
       h1 {
         margin: 0;
         font-size: 1.6rem;
@@ -81,14 +75,12 @@
         color: #6b7280;
         line-height: 1.5;
       }
-
       label {
         margin: 0;
         font-size: 0.9rem;
         font-weight: 600;
         color: #374151;
       }
-
       input[type="text"] {
         width: 100%;
         padding: 0.9rem 1rem;
@@ -103,7 +95,6 @@
         outline: none;
         box-shadow: 0 0 0 3px rgba(6, 199, 85, 0.2);
       }
-
       button {
         width: 100%;
         padding: 1rem;
@@ -126,7 +117,6 @@
         transform: none;
         box-shadow: none;
       }
-
       #statusMessage,
       #purchaseStatus {
         margin-top: 0.5rem;
@@ -141,7 +131,6 @@
       .error {
         color: #ef4444;
       }
-
       .purchase-button {
         padding: 0.5rem 1rem;
         font-size: 0.9rem;
@@ -151,8 +140,9 @@
         background: #d1d5db;
       }
 
+      /* ★変更点1: CSSのセレクタを修正★ */
       #logoutButton,
-      #backToPurchaseButton {
+      #closeButton {
         margin-top: 1rem;
         font-size: 0.9rem;
         background: linear-gradient(to right, #6b7280, #4b5563);
@@ -177,18 +167,19 @@
         class="glass"
         style="display: none; flex-direction: column; gap: 1rem"
       >
-        <h1>お弁当を選択</h1>
+        <h1>お弁当の注文</h1>
         <p class="subtitle">
-          <span id="userNameDisplay"></span>さん、メニューを選んでください
+          <span id="userNameDisplay"></span>さん、ご注文はこちらから
         </p>
-        <button class="purchase-button" data-bento-name="幕の内弁当">
-          幕の内弁当
-        </button>
-        <button class="purchase-button" data-bento-name="唐揚げ弁当">
-          唐揚げ弁当
-        </button>
-        <button class="purchase-button" data-bento-name="のり弁当">
-          のり弁当
+        <div class="bento-description">
+          プロドライバー専用弁当<br />
+          ￥300（税込み）
+        </div>
+        <button
+          class="purchase-button"
+          data-bento-name="プロドライバー専用弁当"
+        >
+          購入する
         </button>
         <div id="purchaseStatus"></div>
         <button id="logoutButton">登録情報を消して戻る</button>
@@ -201,7 +192,7 @@
       >
         <h1>ご注文ありがとうございました！</h1>
         <p class="subtitle">注文が完了しました。</p>
-        <button id="backToPurchaseButton">続けて購入する</button>
+        <button id="closeButton">画面を閉じる</button>
       </section>
     </div>
 
@@ -228,14 +219,13 @@
         const logoutButton = document.getElementById("logoutButton");
         const purchaseButtons = document.querySelectorAll(".purchase-button");
         const purchaseStatus = document.getElementById("purchaseStatus");
-        const backToPurchaseButton = document.getElementById(
-          "backToPurchaseButton"
-        );
+        // ★変更点3: 取得するボタンのIDを修正★
+        const closeButton = document.getElementById("closeButton");
 
         const GAS_URL =
-          "https://script.google.com/macros/s/AKfycbw95ivx-BWjSYujQKYRHYdVzV4KJhZTbc7dhVGeT8GfqrXSTrqh6OzyHDI4ksx6vkiKrA/exec";
+          "https://script.google.com/macros/s/AKfycbzX_RWe1GTKutM_mnkeXIYCjC_YS6CwrPq6sIYE0LMWgcyV5IwHg7Uc_z9NdEUuD29ASw/exec";
 
-        // ===== ページ切り替え関　数 =====
+        // (ページ切り替え、初期化、登録・購入ボタンの処理は変更なし)
         function showPage(page) {
           registrationSection.style.display = "none";
           purchaseSection.style.display = "none";
@@ -250,14 +240,12 @@
           }
         }
 
-        // ===== 初期化 =====
         if (localStorage.getItem("employeeId")) {
           showPage("purchase");
         } else {
           showPage("registration");
         }
 
-        // ===== 登録ボタン =====
         submitButton.addEventListener("click", () => {
           const name = nameInput.value.trim();
           const employeeId = employeeIdInput.value.trim();
@@ -266,17 +254,14 @@
             statusMessage.className = "error";
             return;
           }
-
-          submitButton.disabled = true; // ボタンを無効化
+          submitButton.disabled = true;
           statusMessage.textContent = "📡 登録中...";
           statusMessage.className = "";
-
           const params = new URLSearchParams({
             name: name,
             employeeId: employeeId,
             action: "register",
           });
-
           fetch(GAS_URL, {
             method: "POST",
             headers: {
@@ -298,11 +283,10 @@
               statusMessage.className = "error";
             })
             .finally(() => {
-              submitButton.disabled = false; // ボタンを有効化
+              submitButton.disabled = false;
             });
         });
 
-        // ===== 購入ボタン =====
         purchaseButtons.forEach((button) => {
           button.addEventListener("click", async () => {
             if (
@@ -311,22 +295,18 @@
               )
             )
               return;
-
             const name = localStorage.getItem("userName");
             const employeeId = localStorage.getItem("employeeId");
             if (!name || !employeeId) {
               alert("情報がありません。登録画面に戻ります。");
               return showPage("registration");
             }
-
-            button.disabled = true; // ボタンを無効化
+            button.disabled = true;
             purchaseStatus.textContent = "📡 購入処理中...";
             purchaseStatus.className = "";
-
             try {
               const profile = await liff.getProfile();
               const userId = profile.userId;
-
               const params = new URLSearchParams({
                 name: name,
                 employeeId: employeeId,
@@ -334,7 +314,6 @@
                 action: "purchase",
                 userId: userId,
               });
-
               await fetch(GAS_URL, {
                 method: "POST",
                 headers: {
@@ -343,19 +322,17 @@
                 body: params.toString(),
                 mode: "no-cors",
               });
-
               showPage("complete");
             } catch (error) {
               console.error("❌ 購入エラー:", error);
               purchaseStatus.textContent = "購入に失敗しました。";
               purchaseStatus.className = "error";
             } finally {
-              button.disabled = false; // ボタンを有効化
+              button.disabled = false;
             }
           });
         });
 
-        // ===== ログアウト =====
         logoutButton.addEventListener("click", () => {
           if (confirm("記憶した情報を削除し、登録画面に戻りますか？")) {
             localStorage.removeItem("userName");
@@ -364,9 +341,10 @@
           }
         });
 
-        // ===== 続けて購入 =====
-        backToPurchaseButton.addEventListener("click", () => {
-          showPage("purchase");
+        // ★変更点4: ボタンの動作を修正★
+        // 「続けて購入」ボタンの処理を削除し、「画面を閉じる」ボタンの処理を新設
+        closeButton.addEventListener("click", () => {
+          liff.closeWindow();
         });
       });
     </script>
