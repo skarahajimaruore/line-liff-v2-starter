@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
     showPage("registration");
   }
 
-  // ===== 登録ボタン =====
+  // ===== 登録ボタン (★ここを修正) =====
   submitButton.addEventListener("click", () => {
     const name = nameInput.value.trim();
     const employeeId = employeeIdInput.value.trim();
@@ -69,11 +69,15 @@ document.addEventListener("DOMContentLoaded", function () {
       body: params.toString(),
     })
       .then((response) => {
-        if (!response.ok)
+        if (!response.ok) {
           throw new Error("サーバー応答エラー：" + response.status);
-        return response.json();
+        }
+        // GASからの返事をまずテキストとして安全に受け取る
+        return response.text();
       })
-      .then((data) => {
+      .then((text) => {
+        // テキストが空でなければJSONとして解析を試みる
+        const data = text ? JSON.parse(text) : { result: "success" };
         if (data.result === "success") {
           localStorage.setItem("userName", name);
           localStorage.setItem("employeeId", employeeId);
@@ -93,7 +97,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // ===== 購入ボタン (★ここを修正) =====
   purchaseButtons.forEach((button) => {
-    // ★変更点1: async を追加
     button.addEventListener("click", async () => {
       const bentoName = button.dataset.bentoName;
       const name = localStorage.getItem("userName");
@@ -108,7 +111,6 @@ document.addEventListener("DOMContentLoaded", function () {
       purchaseStatus.className = "";
 
       try {
-        // ★変更点2: LIFFでユーザーIDを取得
         const profile = await liff.getProfile();
         const userId = profile.userId;
 
@@ -117,7 +119,7 @@ document.addEventListener("DOMContentLoaded", function () {
           employeeId: employeeId,
           bentoName: bentoName,
           action: "purchase",
-          userId: userId, // ★変更点3: 送信するデータにuserIdを追加
+          userId: userId,
         });
 
         const response = await fetch(GAS_URL, {
@@ -130,7 +132,9 @@ document.addEventListener("DOMContentLoaded", function () {
           throw new Error("サーバー応答エラー：" + response.status);
         }
 
-        const data = await response.json();
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : { result: "success" };
+
         if (data.result === "success") {
           showPage("complete");
         } else {
