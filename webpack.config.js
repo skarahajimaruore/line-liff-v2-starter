@@ -5,19 +5,13 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 module.exports = {
   mode: "production",
 
-  // エントリーポイント（入力ファイル）
-  entry: {
-    // 利用者ページ用JS
-    main: "./src/vanilla/index.js",
-    // 管理ページ用JS
-    admin: "./src/admin/admin.js",
-  },
+  // 利用者アプリのJSファイルのみをエントリーポイントに設定
+  entry: "./src/vanilla/index.js",
 
-  // 出力設定
+  // 出力設定をシンプルに
   output: {
     path: path.resolve(__dirname, "dist"),
-    // 出力ファイル名 [name]にはentryのキーが入る (main, admin)
-    filename: "[name]/bundle.js",
+    filename: "bundle.js",
     clean: true, // ビルド前にdistフォルダを空にする
   },
 
@@ -39,25 +33,17 @@ module.exports = {
   // プラグイン設定
   plugins: [
     new MiniCssExtractPlugin({
-      filename: "[name]/styles.css",
+      filename: "styles.css",
     }),
 
-    // 利用者ページのHTMLを生成 (`dist/index.html`)
+    // 利用者ページのHTML生成設定のみを残す
     new HtmlWebpackPlugin({
       template: "./src/vanilla/index.html",
       filename: "index.html",
-      chunks: ["main"], // mainのJSとCSSだけを読み込む
-    }),
-
-    // 管理ページのHTMLを生成 (`dist/admin/index.html`)
-    new HtmlWebpackPlugin({
-      template: "./src/admin/admin.html",
-      filename: "admin/index.html",
-      chunks: ["admin"], // adminのJSとCSSだけを読み込む
     }),
   ],
 
-  // 開発用サーバー（Vercelのデプロイには影響なし）
+  // 開発用サーバー
   devServer: {
     static: {
       directory: path.join(__dirname, "dist"),

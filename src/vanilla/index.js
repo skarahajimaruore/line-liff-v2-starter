@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const backToPurchaseButton = document.getElementById("backToPurchaseButton");
 
   const GAS_URL =
-    "https://script.google.com/macros/s/AKfycbzBFGLZaEJ_UZHJvx-LLxZ2EQKWWLTE1se1B1e-qNw_Kt6kX_JF3ilflG28WFQtpLp0bg/exec";
+    "https://script.google.com/macros/s/AKfycbzX_RWe1GTKutM_mnkeXIYCjC_YS6CwrPq6sIYE0LMWgcyV5IwHg7Uc_z9NdEUuD29ASw/exec";
 
   // ===== ページ切り替え関数 =====
   function showPage(page) {
@@ -91,12 +91,14 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 
-  // ===== 購入ボタン =====
+  // ===== 購入ボタン (★ここを修正) =====
   purchaseButtons.forEach((button) => {
-    button.addEventListener("click", () => {
+    // ★変更点1: async を追加
+    button.addEventListener("click", async () => {
       const bentoName = button.dataset.bentoName;
       const name = localStorage.getItem("userName");
       const employeeId = localStorage.getItem("employeeId");
+
       if (!name || !employeeId) {
         alert("情報がありません。登録画面に戻ります。");
         return showPage("registration");
@@ -105,35 +107,40 @@ document.addEventListener("DOMContentLoaded", function () {
       purchaseStatus.textContent = "📡 購入処理中...";
       purchaseStatus.className = "";
 
-      const params = new URLSearchParams({
-        name: name,
-        employeeId: employeeId,
-        bentoName: bentoName,
-        action: "purchase",
-      });
+      try {
+        // ★変更点2: LIFFでユーザーIDを取得
+        const profile = await liff.getProfile();
+        const userId = profile.userId;
 
-      fetch(GAS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: params.toString(),
-      })
-        .then((response) => {
-          if (!response.ok)
-            throw new Error("サーバー応答エラー：" + response.status);
-          return response.json();
-        })
-        .then((data) => {
-          if (data.result === "success") {
-            showPage("complete");
-          } else {
-            throw new Error(data.message || "サーバー側エラー");
-          }
-        })
-        .catch((error) => {
-          console.error("❌ 購入エラー:", error);
-          purchaseStatus.textContent = "購入に失敗しました。";
-          purchaseStatus.className = "error";
+        const params = new URLSearchParams({
+          name: name,
+          employeeId: employeeId,
+          bentoName: bentoName,
+          action: "purchase",
+          userId: userId, // ★変更点3: 送信するデータにuserIdを追加
         });
+
+        const response = await fetch(GAS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: params.toString(),
+        });
+
+        if (!response.ok) {
+          throw new Error("サーバー応答エラー：" + response.status);
+        }
+
+        const data = await response.json();
+        if (data.result === "success") {
+          showPage("complete");
+        } else {
+          throw new Error(data.message || "サーバー側エラー");
+        }
+      } catch (error) {
+        console.error("❌ 購入エラー:", error);
+        purchaseStatus.textContent = "購入に失敗しました。";
+        purchaseStatus.className = "error";
+      }
     });
   });
 
