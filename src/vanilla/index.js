@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const purchaseStatus = document.getElementById("purchaseStatus");
   const backToPurchaseButton = document.getElementById("backToPurchaseButton");
 
+  // ★★★ 新しいURLに修正 ★★★
   const GAS_URL =
     "https://script.google.com/macros/s/AKfycbzX_RWe1GTKutM_mnkeXIYCjC_YS6CwrPq6sIYE0LMWgcyV5IwHg7Uc_z9NdEUuD29ASw/exec";
 
@@ -54,6 +55,8 @@ document.addEventListener("DOMContentLoaded", function () {
       statusMessage.className = "error";
       return;
     }
+
+    submitButton.disabled = true;
     statusMessage.textContent = "📡 登録中...";
     statusMessage.className = "";
 
@@ -63,15 +66,13 @@ document.addEventListener("DOMContentLoaded", function () {
       action: "register",
     });
 
-    // ★★★ここから修正★★★
     fetch(GAS_URL, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: params.toString(),
-      mode: "no-cors", // これを追加！
+      mode: "no-cors",
     })
       .then(() => {
-        // no-corsモードでは返事を読めないが、成功したと見なす
         localStorage.setItem("userName", name);
         localStorage.setItem("employeeId", employeeId);
         statusMessage.textContent = "✅ 登録完了！";
@@ -79,10 +80,12 @@ document.addEventListener("DOMContentLoaded", function () {
         setTimeout(() => showPage("purchase"), 500);
       })
       .catch((error) => {
-        // ここに来るのは、ネットワーク接続がないなど、本当の通信エラー
         console.error("❌ 登録エラー:", error);
-        statusMessage.textContent = "登録中...";
+        statusMessage.textContent = "登録に失敗しました。";
         statusMessage.className = "error";
+      })
+      .finally(() => {
+        submitButton.disabled = false;
       });
   });
 
@@ -99,6 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return showPage("registration");
       }
 
+      button.disabled = true;
       purchaseStatus.textContent = "📡 購入処理中...";
       purchaseStatus.className = "";
 
@@ -114,21 +118,20 @@ document.addEventListener("DOMContentLoaded", function () {
           userId: userId,
         });
 
-        // ★★★ここから修正★★★
         await fetch(GAS_URL, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: params.toString(),
-          mode: "no-cors", // これを追加！
+          mode: "no-cors",
         });
 
-        // no-corsモードでは返事を読めないが、成功したと見なす
         showPage("complete");
       } catch (error) {
-        // ここに来るのは、ネットワーク接続がないなど、本当の通信エラー
         console.error("❌ 購入エラー:", error);
-        purchaseStatus.textContent = "購入中...";
+        purchaseStatus.textContent = "購入に失敗しました。";
         purchaseStatus.className = "error";
+      } finally {
+        button.disabled = false;
       }
     });
   });
