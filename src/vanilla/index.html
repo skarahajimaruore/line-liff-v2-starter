@@ -13,7 +13,7 @@
       rel="stylesheet"
     />
     <style>
-      /* --- （CSSは変更なし） --- */
+      /* --- CSSは変更ありません --- */
       html {
         box-sizing: border-box;
         height: 100%;
@@ -199,7 +199,6 @@
           購入する
         </button>
         <div id="purchaseStatus"></div>
-
         <button id="logoutButton">登録情報（名前・社員番号）を修正する</button>
       </section>
 
@@ -216,6 +215,7 @@
           class="subtitle"
           style="font-weight: 600"
         ></p>
+        <p id="purchaseIdDisplay" class="subtitle" style="font-weight: 600"></p>
         <button id="closeButton">スタッフ確認済み</button>
       </section>
     </div>
@@ -243,14 +243,16 @@
         const purchaseButtons = document.querySelectorAll(".purchase-button");
         const purchaseStatus = document.getElementById("purchaseStatus");
         const closeButton = document.getElementById("closeButton");
-        // ★購入日時表示用の要素を取得★
         const purchaseTimestampDisplay = document.getElementById(
           "purchaseTimestampDisplay"
         );
+        // ★★★ 購入ID表示用の要素を取得 ★★★
+        const purchaseIdDisplay = document.getElementById("purchaseIdDisplay");
         const userInfoDisplays = document.querySelectorAll(".userInfoDisplay");
 
+        // ★★★ GASのURLはご自身のものに設定してください ★★★
         const GAS_URL =
-          "https://script.google.com/macros/s/AKfycbzX_RWe1GTKutM_mnkeXIYCjC_YS6CwrPq6sIYE0LMWgcyV5IwHg7Uc_z9NdEUuD29ASw/exec";
+          "https://script.google.com/macros/s/AKfycbyaeTU-YiDpOX2T911pouNa8SVZQrE2LmYLPV_Swd1Rj1KRKbIv-ybgbRimGs2hnl8pKw/exec";
 
         // ===== ユーザー情報更新 =====
         function updateUserInfoDisplay() {
@@ -279,10 +281,14 @@
             purchaseSection.style.display = "flex";
           } else if (page === "complete") {
             completeSection.style.display = "flex";
-            // ★localStorageから購入日時を取得して表示★
             const timestamp = localStorage.getItem("purchaseTimestamp");
             if (timestamp) {
               purchaseTimestampDisplay.textContent = `購入日時: ${timestamp}`;
+            }
+            // ★★★ localStorageから購入IDを取得して表示する処理を追加 ★★★
+            const purchaseId = localStorage.getItem("purchaseId");
+            if (purchaseId) {
+              purchaseIdDisplay.textContent = `購入ID: ${purchaseId}`;
             }
           } else {
             registrationSection.style.display = "flex";
@@ -309,30 +315,34 @@
           submitButton.disabled = true;
           statusMessage.textContent = "📡 登録中...";
           statusMessage.className = "";
+
           const params = new URLSearchParams({
             name: name,
             employeeId: employeeId,
             action: "register",
           });
+
+          // ★★★ fetchを修正: no-corsを削除し、JSONレスポンスを処理 ★★★
           fetch(GAS_URL, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: params.toString(),
-            mode: "no-cors",
+            body: params,
           })
-            .then(() => {
-              localStorage.setItem("userName", name);
-              localStorage.setItem("employeeId", employeeId);
-              statusMessage.textContent = "✅ 登録完了！";
-              statusMessage.className = "success";
-              updateUserInfoDisplay();
-              setTimeout(() => showPage("purchase"), 500);
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.result === "success") {
+                localStorage.setItem("userName", name);
+                localStorage.setItem("employeeId", employeeId);
+                statusMessage.textContent = "✅ 登録完了！";
+                statusMessage.className = "success";
+                updateUserInfoDisplay();
+                setTimeout(() => showPage("purchase"), 500);
+              } else {
+                throw new Error(data.message || "登録に失敗しました。");
+              }
             })
             .catch((error) => {
               console.error("❌ 登録エラー:", error);
-              statusMessage.textContent = "登録に失敗しました。";
+              statusMessage.textContent = `登録エラー: ${error.message}`;
               statusMessage.className = "error";
             })
             .finally(() => {
@@ -349,20 +359,25 @@
               )
             )
               return;
+
             const name = localStorage.getItem("userName");
             const employeeId = localStorage.getItem("employeeId");
             if (!name || !employeeId) {
               alert("情報がありません。登録画面に戻ります。");
               return showPage("registration");
             }
+
             button.disabled = true;
             purchaseStatus.textContent = "📡 購入処理中...";
             purchaseStatus.className = "";
+
             try {
+              if (!liff.isLoggedIn()) {
+                throw new Error("LINEにログインしていません。");
+              }
               const profile = await liff.getProfile();
               const userId = profile.userId;
 
-              // ★現在日時をフォーマットしてlocalStorageに保存★
               const now = new Date();
               const formattedTimestamp = `${now.getFullYear()}/${String(
                 now.getMonth() + 1
@@ -381,18 +396,25 @@
                 action: "purchase",
                 userId: userId,
               });
-              await fetch(GAS_URL, {
+
+              // ★★★ fetchを修正: no-corsを削除し、JSONレスポンスを処理 ★★★
+              const response = await fetch(GAS_URL, {
                 method: "POST",
-                headers: {
-                  "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: params.toString(),
-                mode: "no-cors",
+                body: params,
               });
-              showPage("complete");
+
+              const data = await response.json();
+
+              if (data.result === "success" && data.purchaseId) {
+                // ★★★ 購入IDをlocalStorageに保存 ★★★
+                localStorage.setItem("purchaseId", data.purchaseId);
+                showPage("complete");
+              } else {
+                throw new Error(data.message || "購入処理に失敗しました。");
+              }
             } catch (error) {
               console.error("❌ 購入エラー:", error);
-              purchaseStatus.textContent = "購入に失敗しました。";
+              purchaseStatus.textContent = `購入エラー: ${error.message}`;
               purchaseStatus.className = "error";
             } finally {
               button.disabled = false;
@@ -405,8 +427,9 @@
           if (confirm("記憶した情報を削除し、登録画面に戻りますか？")) {
             localStorage.removeItem("userName");
             localStorage.removeItem("employeeId");
-            // ★購入日時も消去★
             localStorage.removeItem("purchaseTimestamp");
+            // ★★★ 購入IDも消去 ★★★
+            localStorage.removeItem("purchaseId");
             updateUserInfoDisplay();
             showPage("registration");
           }
