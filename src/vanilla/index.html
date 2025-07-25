@@ -13,7 +13,7 @@
       rel="stylesheet"
     />
     <style>
-      /* --- （基本的なCSSは変更なし） --- */
+      /* --- （CSSは変更なし） --- */
       html {
         box-sizing: border-box;
         height: 100%;
@@ -156,8 +156,6 @@
         border: 1px solid #e5e7eb;
         line-height: 1.6;
       }
-
-      /* ★変更点1: ユーザー情報表示用のCSSを追加★ */
       .userInfoDisplay {
         font-size: 0.8rem;
         color: #4b5563;
@@ -213,6 +211,11 @@
         <div class="userInfoDisplay" style="display: none"></div>
         <h1>ご注文ありがとうございました！</h1>
         <p class="subtitle">注文が完了しました。</p>
+        <p
+          id="purchaseTimestampDisplay"
+          class="subtitle"
+          style="font-weight: 600"
+        ></p>
         <button id="closeButton">画面を閉じる</button>
       </section>
     </div>
@@ -240,13 +243,16 @@
         const purchaseButtons = document.querySelectorAll(".purchase-button");
         const purchaseStatus = document.getElementById("purchaseStatus");
         const closeButton = document.getElementById("closeButton");
-        // ★変更点3: ユーザー情報表示エリアを取得★
+        // ★購入日時表示用の要素を取得★
+        const purchaseTimestampDisplay = document.getElementById(
+          "purchaseTimestampDisplay"
+        );
         const userInfoDisplays = document.querySelectorAll(".userInfoDisplay");
 
         const GAS_URL =
           "https://script.google.com/macros/s/AKfycbzX_RWe1GTKutM_mnkeXIYCjC_YS6CwrPq6sIYE0LMWgcyV5IwHg7Uc_z9NdEUuD29ASw/exec";
 
-        // ★変更点4: ユーザー情報を更新する関数を新設★
+        // ===== ユーザー情報更新 =====
         function updateUserInfoDisplay() {
           const name = localStorage.getItem("userName");
           const employeeId = localStorage.getItem("employeeId");
@@ -254,11 +260,11 @@
           if (name && employeeId) {
             userInfoDisplays.forEach((el) => {
               el.textContent = `社員番号: ${employeeId} | 名前: ${name}`;
-              el.style.display = "block"; // 表示する
+              el.style.display = "block";
             });
           } else {
             userInfoDisplays.forEach((el) => {
-              el.style.display = "none"; // 非表示にする
+              el.style.display = "none";
             });
           }
         }
@@ -268,14 +274,19 @@
           registrationSection.style.display = "none";
           purchaseSection.style.display = "none";
           completeSection.style.display = "none";
+
           if (page === "purchase") {
             purchaseSection.style.display = "flex";
           } else if (page === "complete") {
             completeSection.style.display = "flex";
+            // ★localStorageから購入日時を取得して表示★
+            const timestamp = localStorage.getItem("purchaseTimestamp");
+            if (timestamp) {
+              purchaseTimestampDisplay.textContent = `購入日時: ${timestamp}`;
+            }
           } else {
             registrationSection.style.display = "flex";
           }
-          // ページが切り替わるたびにユーザー情報を更新
           updateUserInfoDisplay();
         }
 
@@ -316,7 +327,6 @@
               localStorage.setItem("employeeId", employeeId);
               statusMessage.textContent = "✅ 登録完了！";
               statusMessage.className = "success";
-              // ★変更点5: 成功後にもユーザー情報を更新★
               updateUserInfoDisplay();
               setTimeout(() => showPage("purchase"), 500);
             })
@@ -351,6 +361,19 @@
             try {
               const profile = await liff.getProfile();
               const userId = profile.userId;
+
+              // ★現在日時をフォーマットしてlocalStorageに保存★
+              const now = new Date();
+              const formattedTimestamp = `${now.getFullYear()}/${String(
+                now.getMonth() + 1
+              ).padStart(2, "0")}/${String(now.getDate()).padStart(
+                2,
+                "0"
+              )} ${String(now.getHours()).padStart(2, "0")}:${String(
+                now.getMinutes()
+              ).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+              localStorage.setItem("purchaseTimestamp", formattedTimestamp);
+
               const params = new URLSearchParams({
                 name: name,
                 employeeId: employeeId,
@@ -382,7 +405,8 @@
           if (confirm("記憶した情報を削除し、登録画面に戻りますか？")) {
             localStorage.removeItem("userName");
             localStorage.removeItem("employeeId");
-            // ユーザー情報を消去
+            // ★購入日時も消去★
+            localStorage.removeItem("purchaseTimestamp");
             updateUserInfoDisplay();
             showPage("registration");
           }
