@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+      content="width=device-width, initial-scale=1.0,viewport-fit=cover"
     />
     <title>プロドライバー弁当申請</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -13,7 +13,6 @@
       rel="stylesheet"
     />
     <style>
-      /* --- CSSは変更ありません --- */
       html {
         box-sizing: border-box;
         height: 100%;
@@ -23,6 +22,7 @@
       *::after {
         box-sizing: inherit;
       }
+
       body {
         margin: 0;
         padding: 0;
@@ -30,6 +30,7 @@
         font-family: "Inter", sans-serif;
         background: linear-gradient(135deg, #e0f7f3, #f5fdfb);
       }
+
       .wrapper {
         display: flex;
         align-items: center;
@@ -37,6 +38,7 @@
         min-height: 100%;
         padding: 1rem;
       }
+
       .glass {
         display: flex;
         flex-direction: column;
@@ -61,6 +63,7 @@
           transform: translateY(0);
         }
       }
+
       h1 {
         margin: 0;
         font-size: 1.6rem;
@@ -95,6 +98,7 @@
         outline: none;
         box-shadow: 0 0 0 3px rgba(6, 199, 85, 0.2);
       }
+
       button {
         width: 100%;
         padding: 1rem;
@@ -131,6 +135,7 @@
       .error {
         color: #ef4444;
       }
+
       .purchase-button {
         padding: 0.5rem 1rem;
         font-size: 0.9rem;
@@ -139,6 +144,7 @@
       .purchase-button:disabled {
         background: #d1d5db;
       }
+
       #logoutButton,
       #closeButton {
         margin-top: 1rem;
@@ -150,7 +156,7 @@
         font-size: 1.1rem;
         font-weight: 600;
         color: #374151;
-        background-color: #f9fafb;
+        background: #f9fafb;
         padding: 1rem;
         border-radius: 0.5rem;
         border: 1px solid #e5e7eb;
@@ -161,7 +167,7 @@
         color: #4b5563;
         text-align: center;
         padding: 0.5rem;
-        background-color: rgba(209, 213, 219, 0.5);
+        background: rgba(209, 213, 219, 0.5);
         border-radius: 0.5rem;
         margin-bottom: 1rem;
       }
@@ -169,6 +175,7 @@
   </head>
   <body>
     <div class="wrapper">
+      <!-- 登録フォーム -->
       <section id="registrationSection" class="glass">
         <div class="userInfoDisplay" style="display: none"></div>
         <h1>情報登録フォーム</h1>
@@ -181,6 +188,7 @@
         <div id="statusMessage"></div>
       </section>
 
+      <!-- 購入フォーム -->
       <section
         id="purchaseSection"
         class="glass"
@@ -189,8 +197,7 @@
         <div class="userInfoDisplay" style="display: none"></div>
         <h1>お弁当の注文</h1>
         <div class="bento-description">
-          プロドライバー専用弁当<br />
-          ￥300（税込み）
+          プロドライバー専用弁当<br />￥300（税込）
         </div>
         <button
           class="purchase-button"
@@ -199,9 +206,10 @@
           購入する
         </button>
         <div id="purchaseStatus"></div>
-        <button id="logoutButton">登録情報（名前・社員番号）を修正する</button>
+        <button id="logoutButton">登録情報を修正する</button>
       </section>
 
+      <!-- 完了画面 -->
       <section
         id="completeSection"
         class="glass"
@@ -209,7 +217,7 @@
       >
         <div class="userInfoDisplay" style="display: none"></div>
         <h1>購入が完了しました！</h1>
-        <p class="subtitle">スタッフに画面を提示して下さい</p>
+        <p class="subtitle">スタッフに画面を提示してください</p>
         <p
           id="purchaseTimestampDisplay"
           class="subtitle"
@@ -221,224 +229,142 @@
     </div>
 
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // ===== LIFF初期化 =====
-        const liffId = "2007755942-oQ4lzEn9";
-        liff
-          .init({ liffId })
-          .then(() => console.log("✅ LIFF OK"))
-          .catch((e) => console.error("❌ LIFF NG", e));
+      document.addEventListener("DOMContentLoaded", async () => {
+        await liff.init({ liffId: "2007755942-oQ4lzEn9" });
+        const ENDPOINT =
+          "https://script.google.com/macros/s/AKfycbx0gqz0c0ISDOJOkVf6w2cWSvwqDZUAyfHFXJh0dXFPJ_8R-ejl4hcdH37RW-1gAz3M8A/exec";
 
-        // ===== 要素取得 =====
-        const registrationSection = document.getElementById(
-          "registrationSection"
-        );
-        const purchaseSection = document.getElementById("purchaseSection");
-        const completeSection = document.getElementById("completeSection");
-        const nameInput = document.getElementById("nameInput");
-        const employeeIdInput = document.getElementById("employeeIdInput");
-        const submitButton = document.getElementById("submitButton");
-        const statusMessage = document.getElementById("statusMessage");
-        const logoutButton = document.getElementById("logoutButton");
-        const purchaseButtons = document.querySelectorAll(".purchase-button");
-        const purchaseStatus = document.getElementById("purchaseStatus");
-        const closeButton = document.getElementById("closeButton");
-        const purchaseTimestampDisplay = document.getElementById(
-          "purchaseTimestampDisplay"
-        );
-        // ★★★ 購入ID表示用の要素を取得 ★★★
-        const purchaseIdDisplay = document.getElementById("purchaseIdDisplay");
-        const userInfoDisplays = document.querySelectorAll(".userInfoDisplay");
+        const reg = document.getElementById("registrationSection");
+        const pur = document.getElementById("purchaseSection");
+        const com = document.getElementById("completeSection");
+        const name = document.getElementById("nameInput");
+        const id = document.getElementById("employeeIdInput");
+        const btnR = document.getElementById("submitButton");
+        const msgR = document.getElementById("statusMessage");
+        const btnB = document.querySelector(".purchase-button");
+        const msgB = document.getElementById("purchaseStatus");
+        const btnL = document.getElementById("logoutButton");
+        const btnC = document.getElementById("closeButton");
+        const tsEl = document.getElementById("purchaseTimestampDisplay");
+        const idEl = document.getElementById("purchaseIdDisplay");
+        const info = document.querySelectorAll(".userInfoDisplay");
 
-        // ★★★ GASのURLはご自身のものに設定してください ★★★
-        const GAS_URL =
-          "https://script.google.com/macros/s/AKfycbxhglKwpcdx_LQv9tURek_vSh4e3Jt4lK1CWUFzAxpQ7y2GFsUz0gBb2ZDFvsCakwjUVA/exec";
-
-        // ===== ユーザー情報更新 =====
-        function updateUserInfoDisplay() {
-          const name = localStorage.getItem("userName");
-          const employeeId = localStorage.getItem("employeeId");
-
-          if (name && employeeId) {
-            userInfoDisplays.forEach((el) => {
-              el.textContent = `社員番号: ${employeeId} | 名前: ${name}`;
+        function updateInfo() {
+          const u = localStorage.getItem("userName"),
+            e = localStorage.getItem("employeeId");
+          info.forEach((el) => {
+            if (u && e) {
+              el.textContent = `社員番号: ${e} | 名前: ${u}`;
               el.style.display = "block";
-            });
-          } else {
-            userInfoDisplays.forEach((el) => {
-              el.style.display = "none";
-            });
-          }
+            } else el.style.display = "none";
+          });
         }
-
-        // ===== ページ切り替え関数 =====
-        function showPage(page) {
-          registrationSection.style.display = "none";
-          purchaseSection.style.display = "none";
-          completeSection.style.display = "none";
-
-          if (page === "purchase") {
-            purchaseSection.style.display = "flex";
-          } else if (page === "complete") {
-            completeSection.style.display = "flex";
-            const timestamp = localStorage.getItem("purchaseTimestamp");
-            if (timestamp) {
-              purchaseTimestampDisplay.textContent = `購入日時: ${timestamp}`;
-            }
-            // ★★★ localStorageから購入IDを取得して表示する処理を追加 ★★★
-            const purchaseId = localStorage.getItem("purchaseId");
-            if (purchaseId) {
-              purchaseIdDisplay.textContent = `購入ID: ${purchaseId}`;
-            }
-          } else {
-            registrationSection.style.display = "flex";
-          }
-          updateUserInfoDisplay();
+        function show(p) {
+          reg.style.display = pur.style.display = com.style.display = "none";
+          if (p === "purchase") pur.style.display = "flex";
+          else if (p === "complete") {
+            com.style.display = "flex";
+            tsEl.textContent = localStorage.getItem("purchaseTimestamp") || "";
+            idEl.textContent = localStorage.getItem("purchaseId") || "";
+          } else reg.style.display = "flex";
+          updateInfo();
         }
+        show(localStorage.getItem("employeeId") ? "purchase" : "registration");
 
-        // ===== 初期化 =====
-        if (localStorage.getItem("employeeId")) {
-          showPage("purchase");
-        } else {
-          showPage("registration");
-        }
-
-        // ===== 登録ボタン =====
-        submitButton.addEventListener("click", () => {
-          const name = nameInput.value.trim();
-          const employeeId = employeeIdInput.value.trim();
-          if (!name || !employeeId) {
-            statusMessage.textContent = "⚠️ 名前と社員番号を入力してください。";
-            statusMessage.className = "error";
+        // 登録
+        btnR.addEventListener("click", async () => {
+          const n = name.value.trim(),
+            e = id.value.trim();
+          if (!n || !e) {
+            msgR.textContent = "⚠️ 名前と社員番号を入力してください";
+            msgR.className = "error";
             return;
           }
-          submitButton.disabled = true;
-          statusMessage.textContent = "📡 登録中...";
-          statusMessage.className = "";
-
-          const params = new URLSearchParams({
-            name: name,
-            employeeId: employeeId,
-            action: "register",
-          });
-
-          // ★★★ fetchを修正: no-corsを削除し、JSONレスポンスを処理 ★★★
-          fetch(GAS_URL, {
-            method: "POST",
-            body: params,
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.result === "success") {
-                localStorage.setItem("userName", name);
-                localStorage.setItem("employeeId", employeeId);
-                statusMessage.textContent = "✅ 登録完了！";
-                statusMessage.className = "success";
-                updateUserInfoDisplay();
-                setTimeout(() => showPage("purchase"), 500);
-              } else {
-                throw new Error(data.message || "登録に失敗しました。");
-              }
-            })
-            .catch((error) => {
-              console.error("❌ 登録エラー:", error);
-              statusMessage.textContent = `登録エラー: ${error.message}`;
-              statusMessage.className = "error";
-            })
-            .finally(() => {
-              submitButton.disabled = false;
+          btnR.disabled = true;
+          msgR.textContent = "📡 登録中…";
+          msgR.className = "";
+          try {
+            const res = await fetch(ENDPOINT, {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: new URLSearchParams({
+                action: "register",
+                name: n,
+                employeeId: e,
+              }),
             });
-        });
-
-        // ===== 購入ボタン =====
-        purchaseButtons.forEach((button) => {
-          button.addEventListener("click", async () => {
-            if (
-              !confirm(
-                `${button.dataset.bentoName}を購入します。よろしいですか？`
-              )
-            )
-              return;
-
-            const name = localStorage.getItem("userName");
-            const employeeId = localStorage.getItem("employeeId");
-            if (!name || !employeeId) {
-              alert("情報がありません。登録画面に戻ります。");
-              return showPage("registration");
-            }
-
-            button.disabled = true;
-            purchaseStatus.textContent = "📡 購入処理中...";
-            purchaseStatus.className = "";
-
-            try {
-              if (!liff.isLoggedIn()) {
-                throw new Error("LINEにログインしていません。");
-              }
-              const profile = await liff.getProfile();
-              const userId = profile.userId;
-
-              const now = new Date();
-              const formattedTimestamp = `${now.getFullYear()}/${String(
-                now.getMonth() + 1
-              ).padStart(2, "0")}/${String(now.getDate()).padStart(
-                2,
-                "0"
-              )} ${String(now.getHours()).padStart(2, "0")}:${String(
-                now.getMinutes()
-              ).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
-              localStorage.setItem("purchaseTimestamp", formattedTimestamp);
-
-              const params = new URLSearchParams({
-                name: name,
-                employeeId: employeeId,
-                bentoName: button.dataset.bentoName,
-                action: "purchase",
-                userId: userId,
-              });
-
-              // ★★★ fetchを修正: no-corsを削除し、JSONレスポンスを処理 ★★★
-              const response = await fetch(GAS_URL, {
-                method: "POST",
-                body: params,
-              });
-
-              const data = await response.json();
-
-              if (data.result === "success" && data.purchaseId) {
-                // ★★★ 購入IDをlocalStorageに保存 ★★★
-                localStorage.setItem("purchaseId", data.purchaseId);
-                showPage("complete");
-              } else {
-                throw new Error(data.message || "購入処理に失敗しました。");
-              }
-            } catch (error) {
-              console.error("❌ 購入エラー:", error);
-              purchaseStatus.textContent = `購入エラー: ${error.message}`;
-              purchaseStatus.className = "error";
-            } finally {
-              button.disabled = false;
-            }
-          });
-        });
-
-        // ===== ログアウト =====
-        logoutButton.addEventListener("click", () => {
-          if (confirm("記憶した情報を削除し、登録画面に戻りますか？")) {
-            localStorage.removeItem("userName");
-            localStorage.removeItem("employeeId");
-            localStorage.removeItem("purchaseTimestamp");
-            // ★★★ 購入IDも消去 ★★★
-            localStorage.removeItem("purchaseId");
-            updateUserInfoDisplay();
-            showPage("registration");
+            const d = await res.json();
+            if (d.result === "success") {
+              localStorage.setItem("userName", n);
+              localStorage.setItem("employeeId", e);
+              msgR.textContent = "✅ 登録完了！";
+              msgR.className = "success";
+              setTimeout(() => show("purchase"), 500);
+            } else throw new Error(d.message);
+          } catch (err) {
+            msgR.textContent = `登録エラー: ${err.message}`;
+            msgR.className = "error";
+          } finally {
+            btnR.disabled = false;
           }
         });
 
-        // ===== 画面を閉じるボタン =====
-        closeButton.addEventListener("click", () => {
-          liff.closeWindow();
+        // 購入
+        btnB.addEventListener("click", async () => {
+          if (!confirm(`${btnB.dataset.bentoName}を購入しますか？`)) return;
+          btnB.disabled = true;
+          msgB.textContent = "📡 購入中…";
+          msgB.className = "";
+          try {
+            if (!liff.isLoggedIn()) await liff.login();
+            const p = await liff.getProfile();
+            const now = new Date();
+            const ts = `${now.getFullYear()}/${String(
+              now.getMonth() + 1
+            ).padStart(2, "0")}/${String(now.getDate()).padStart(
+              2,
+              "0"
+            )} ${String(now.getHours()).padStart(2, "0")}:${String(
+              now.getMinutes()
+            ).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+            localStorage.setItem("purchaseTimestamp", ts);
+            const res2 = await fetch(ENDPOINT, {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: new URLSearchParams({
+                action: "purchase",
+                name: localStorage.getItem("userName"),
+                employeeId: localStorage.getItem("employeeId"),
+                bentoName: btnB.dataset.bentoName,
+                userId: p.userId,
+              }),
+            });
+            const d2 = await res2.json();
+            if (d2.result === "success") {
+              localStorage.setItem("purchaseId", d2.purchaseId);
+              show("complete");
+            } else throw new Error(d2.message);
+          } catch (err) {
+            msgB.textContent = `購入エラー: ${err.message}`;
+            msgB.className = "error";
+          } finally {
+            btnB.disabled = false;
+          }
         });
+
+        // 修正／閉じる
+        btnL.addEventListener("click", () => {
+          if (confirm("登録情報を削除して戻りますか？")) {
+            [
+              "userName",
+              "employeeId",
+              "purchaseTimestamp",
+              "purchaseId",
+            ].forEach((k) => localStorage.removeItem(k));
+            show("registration");
+          }
+        });
+        btnC.addEventListener("click", () => liff.closeWindow());
       });
     </script>
   </body>
