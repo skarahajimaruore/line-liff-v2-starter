@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0,viewport-fit=cover"
+      content="width=device-width,initial-scale=1.0,viewport-fit=cover"
     />
     <title>プロドライバー弁当申請</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -22,7 +22,6 @@
       *::after {
         box-sizing: inherit;
       }
-
       body {
         margin: 0;
         padding: 0;
@@ -30,7 +29,6 @@
         font-family: "Inter", sans-serif;
         background: linear-gradient(135deg, #e0f7f3, #f5fdfb);
       }
-
       .wrapper {
         display: flex;
         align-items: center;
@@ -38,14 +36,12 @@
         min-height: 100%;
         padding: 1rem;
       }
-
       .glass {
         display: flex;
         flex-direction: column;
         gap: 1rem;
         background: rgba(255, 255, 255, 0.8);
         backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
         border-radius: 1.25rem;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
         padding: 2rem 1.5rem;
@@ -63,7 +59,6 @@
           transform: translateY(0);
         }
       }
-
       h1 {
         margin: 0;
         font-size: 1.6rem;
@@ -98,7 +93,6 @@
         outline: none;
         box-shadow: 0 0 0 3px rgba(6, 199, 85, 0.2);
       }
-
       button {
         width: 100%;
         padding: 1rem;
@@ -135,7 +129,6 @@
       .error {
         color: #ef4444;
       }
-
       .purchase-button {
         padding: 0.5rem 1rem;
         font-size: 0.9rem;
@@ -144,7 +137,6 @@
       .purchase-button:disabled {
         background: #d1d5db;
       }
-
       #logoutButton,
       #closeButton {
         margin-top: 1rem;
@@ -230,130 +222,153 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", async () => {
+        // LIFF 初期化
         await liff.init({ liffId: "2007755942-oQ4lzEn9" });
-        const ENDPOINT =
-          "https://script.google.com/macros/s/AKfycbx0gqz0c0ISDOJOkVf6w2cWSvwqDZUAyfHFXJh0dXFPJ_8R-ejl4hcdH37RW-1gAz3M8A/exec";
+        console.log("✅ LIFF OK");
 
-        const reg = document.getElementById("registrationSection");
-        const pur = document.getElementById("purchaseSection");
-        const com = document.getElementById("completeSection");
-        const name = document.getElementById("nameInput");
-        const id = document.getElementById("employeeIdInput");
-        const btnR = document.getElementById("submitButton");
-        const msgR = document.getElementById("statusMessage");
-        const btnB = document.querySelector(".purchase-button");
-        const msgB = document.getElementById("purchaseStatus");
-        const btnL = document.getElementById("logoutButton");
-        const btnC = document.getElementById("closeButton");
+        // **必ずここを再デプロイ後の URL に置き換えてください**
+        const ENDPOINT =
+          "https://script.google.com/macros/s/AKfycbzNj3drDrLv2KMficmAe-VCP5d2j4XexDFiJYaMaAVtIFdZDhR6Rq9ZOk46_jP7tn1QPg/exec";
+
+        // 要素取得
+        const regSec = document.getElementById("registrationSection");
+        const purSec = document.getElementById("purchaseSection");
+        const comSec = document.getElementById("completeSection");
+        const nameEl = document.getElementById("nameInput");
+        const idEl = document.getElementById("employeeIdInput");
+        const btnReg = document.getElementById("submitButton");
+        const msgReg = document.getElementById("statusMessage");
+        const btnPurchases = document.querySelectorAll(".purchase-button");
+        const msgPur = document.getElementById("purchaseStatus");
+        const btnLogout = document.getElementById("logoutButton");
+        const btnClose = document.getElementById("closeButton");
         const tsEl = document.getElementById("purchaseTimestampDisplay");
-        const idEl = document.getElementById("purchaseIdDisplay");
-        const info = document.querySelectorAll(".userInfoDisplay");
+        const pidEl = document.getElementById("purchaseIdDisplay");
+        const infoEls = document.querySelectorAll(".userInfoDisplay");
 
         function updateInfo() {
-          const u = localStorage.getItem("userName"),
-            e = localStorage.getItem("employeeId");
-          info.forEach((el) => {
+          const u = localStorage.getItem("userName");
+          const e = localStorage.getItem("employeeId");
+          infoEls.forEach((el) => {
             if (u && e) {
               el.textContent = `社員番号: ${e} | 名前: ${u}`;
               el.style.display = "block";
-            } else el.style.display = "none";
+            } else {
+              el.style.display = "none";
+            }
           });
         }
-        function show(p) {
-          reg.style.display = pur.style.display = com.style.display = "none";
-          if (p === "purchase") pur.style.display = "flex";
-          else if (p === "complete") {
-            com.style.display = "flex";
+
+        function show(page) {
+          regSec.style.display =
+            purSec.style.display =
+            comSec.style.display =
+              "none";
+          if (page === "purchase") purSec.style.display = "flex";
+          else if (page === "complete") {
+            comSec.style.display = "flex";
             tsEl.textContent = localStorage.getItem("purchaseTimestamp") || "";
-            idEl.textContent = localStorage.getItem("purchaseId") || "";
-          } else reg.style.display = "flex";
+            pidEl.textContent = localStorage.getItem("purchaseId") || "";
+          } else {
+            regSec.style.display = "flex";
+          }
           updateInfo();
         }
+
+        // 初期表示
         show(localStorage.getItem("employeeId") ? "purchase" : "registration");
 
-        // 登録
-        btnR.addEventListener("click", async () => {
-          const n = name.value.trim(),
-            e = id.value.trim();
-          if (!n || !e) {
-            msgR.textContent = "⚠️ 名前と社員番号を入力してください";
-            msgR.className = "error";
+        // 登録処理
+        btnReg.addEventListener("click", async () => {
+          const name = nameEl.value.trim();
+          const employeeId = idEl.value.trim();
+          if (!name || !employeeId) {
+            msgReg.textContent = "⚠️ 名前と社員番号を入力してください";
+            msgReg.className = "error";
             return;
           }
-          btnR.disabled = true;
-          msgR.textContent = "📡 登録中…";
-          msgR.className = "";
+          btnReg.disabled = true;
+          msgReg.textContent = "📡 登録中...";
+          msgReg.className = "";
           try {
             const res = await fetch(ENDPOINT, {
               method: "POST",
-              headers: { "Content-Type": "application/x-www-form-urlencoded" },
-              body: new URLSearchParams({
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
                 action: "register",
-                name: n,
-                employeeId: e,
+                name,
+                employeeId,
               }),
             });
             const d = await res.json();
             if (d.result === "success") {
-              localStorage.setItem("userName", n);
-              localStorage.setItem("employeeId", e);
-              msgR.textContent = "✅ 登録完了！";
-              msgR.className = "success";
+              localStorage.setItem("userName", name);
+              localStorage.setItem("employeeId", employeeId);
+              msgReg.textContent = "✅ 登録完了！";
+              msgReg.className = "success";
               setTimeout(() => show("purchase"), 500);
-            } else throw new Error(d.message);
+            } else {
+              throw new Error(d.message);
+            }
           } catch (err) {
-            msgR.textContent = `登録エラー: ${err.message}`;
-            msgR.className = "error";
+            console.error(err);
+            msgReg.textContent = `登録エラー: ${err.message}`;
+            msgReg.className = "error";
           } finally {
-            btnR.disabled = false;
+            btnReg.disabled = false;
           }
         });
 
-        // 購入
-        btnB.addEventListener("click", async () => {
-          if (!confirm(`${btnB.dataset.bentoName}を購入しますか？`)) return;
-          btnB.disabled = true;
-          msgB.textContent = "📡 購入中…";
-          msgB.className = "";
-          try {
-            if (!liff.isLoggedIn()) await liff.login();
-            const p = await liff.getProfile();
-            const now = new Date();
-            const ts = `${now.getFullYear()}/${String(
-              now.getMonth() + 1
-            ).padStart(2, "0")}/${String(now.getDate()).padStart(
-              2,
-              "0"
-            )} ${String(now.getHours()).padStart(2, "0")}:${String(
-              now.getMinutes()
-            ).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
-            localStorage.setItem("purchaseTimestamp", ts);
-            const res2 = await fetch(ENDPOINT, {
-              method: "POST",
-              headers: { "Content-Type": "application/x-www-form-urlencoded" },
-              body: new URLSearchParams({
-                action: "purchase",
-                name: localStorage.getItem("userName"),
-                employeeId: localStorage.getItem("employeeId"),
-                bentoName: btnB.dataset.bentoName,
-                userId: p.userId,
-              }),
-            });
-            const d2 = await res2.json();
-            if (d2.result === "success") {
-              localStorage.setItem("purchaseId", d2.purchaseId);
-              show("complete");
-            } else throw new Error(d2.message);
-          } catch (err) {
-            msgB.textContent = `購入エラー: ${err.message}`;
-            msgB.className = "error";
-          } finally {
-            btnB.disabled = false;
-          }
-        });
+        // 購入処理
+        btnPurchases.forEach((btn) =>
+          btn.addEventListener("click", async () => {
+            if (!confirm(`${btn.dataset.bentoName}を購入しますか？`)) return;
+            btn.disabled = true;
+            msgPur.textContent = "📡 購入中...";
+            msgPur.className = "";
+            try {
+              if (!liff.isLoggedIn()) await liff.login();
+              const prof = await liff.getProfile();
+              const now = new Date();
+              const ts = `${now.getFullYear()}/${String(
+                now.getMonth() + 1
+              ).padStart(2, "0")}/${String(now.getDate()).padStart(
+                2,
+                "0"
+              )} ${String(now.getHours()).padStart(2, "0")}:${String(
+                now.getMinutes()
+              ).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+              localStorage.setItem("purchaseTimestamp", ts);
+              const res2 = await fetch(ENDPOINT, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  action: "purchase",
+                  name: localStorage.getItem("userName"),
+                  employeeId: localStorage.getItem("employeeId"),
+                  bentoName: btn.dataset.bentoName,
+                  userId: prof.userId,
+                }),
+              });
+              const d2 = await res2.json();
+              if (d2.result === "success") {
+                localStorage.setItem("purchaseId", d2.purchaseId);
+                show("complete");
+              } else {
+                throw new Error(d2.message);
+              }
+            } catch (err) {
+              console.error(err);
+              msgPur.textContent = `購入エラー: ${err.message}`;
+              msgPur.className = "error";
+            } finally {
+              btn.disabled = false;
+            }
+          })
+        );
 
-        // 修正／閉じる
-        btnL.addEventListener("click", () => {
+        // 登録情報リセット
+        btnLogout.addEventListener("click", () => {
           if (confirm("登録情報を削除して戻りますか？")) {
             [
               "userName",
@@ -364,7 +379,9 @@
             show("registration");
           }
         });
-        btnC.addEventListener("click", () => liff.closeWindow());
+
+        // 閉じる
+        btnClose.addEventListener("click", () => liff.closeWindow());
       });
     </script>
   </body>
