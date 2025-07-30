@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width,initial-scale=1.0,viewport-fit=cover"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
     <title>プロドライバー弁当申請</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -251,7 +251,6 @@
         await liff.init({ liffId });
         console.log("✅ LIFF OK");
 
-        // 要素取得
         const regSec = document.getElementById("registrationSection");
         const purSec = document.getElementById("purchaseSection");
         const comSec = document.getElementById("completeSection");
@@ -262,7 +261,7 @@
         const btnReg = document.getElementById("submitButton");
         const msgReg = document.getElementById("statusMessage");
         const btnPurchases = document.querySelectorAll(".purchase-button");
-        const msgPurchase = document.getElementById("purchaseStatus");
+        const msgPur = document.getElementById("purchaseStatus");
         const btnLogout = document.getElementById("logoutButton");
         const btnClose = document.getElementById("closeButton");
         const tsEl = document.getElementById("purchaseTimestampDisplay");
@@ -271,7 +270,6 @@
         const GAS_URL =
           "https://script.google.com/macros/s/AKfycbx3SrPDi0n5hkuFePnwrE6zrpJKlcpxz9IdDO3CZoqpkLpwqUx9UUIFZCgXA9-JaPIg0A/exec";
 
-        // ユーザー情報表示
         function updateInfo() {
           const u = localStorage.getItem("userName");
           const e = localStorage.getItem("employeeId");
@@ -283,13 +281,13 @@
           });
         }
 
-        // ページ切替
         function show(page) {
           regSec.style.display =
             purSec.style.display =
             comSec.style.display =
               "none";
-          if (page === "purchase") purSec.style.display = "flex";
+          if (page === "purchase")
+            (regSec.style.display = "none"), (purSec.style.display = "flex");
           else if (page === "complete") {
             comSec.style.display = "flex";
             tsEl.textContent = localStorage.getItem("purchaseTimestamp") || "";
@@ -298,10 +296,9 @@
           updateInfo();
         }
 
-        // 初期表示
         show(localStorage.getItem("employeeId") ? "purchase" : "registration");
 
-        // ファイル選択
+        // 写真選択
         let photoData = null;
         btnFile.addEventListener("click", () => fileEl.click());
         fileEl.addEventListener("change", (e) => {
@@ -316,7 +313,7 @@
           fr.readAsDataURL(f);
         });
 
-        // 登録処理
+        // 登録
         btnReg.addEventListener("click", async () => {
           const n = nameEl.value.trim();
           if (!n || !photoData) {
@@ -353,16 +350,16 @@
           }
         });
 
-        // 購入処理
+        // 購入
         btnPurchases.forEach((btn) =>
           btn.addEventListener("click", async () => {
             if (!confirm(`${btn.dataset.bentoName}を購入しますか？`)) return;
             btn.disabled = true;
-            msgPurchase.textContent = "📡 購入中...";
-            msgPurchase.className = "";
+            msgPur.textContent = "📡 購入中...";
+            msgPur.className = "";
             try {
               if (!liff.isLoggedIn()) await liff.login();
-              const pf = await liff.getProfile();
+              const prof = await liff.getProfile();
               const now = new Date();
               const ts = `${now.getFullYear()}/${String(
                 now.getMonth() + 1
@@ -380,7 +377,7 @@
                   name: localStorage.getItem("userName"),
                   employeeId: localStorage.getItem("employeeId"),
                   bentoName: btn.dataset.bentoName,
-                  userId: pf.userId,
+                  userId: prof.userId,
                 }),
               });
               const d = await res.json();
@@ -390,8 +387,8 @@
               } else throw new Error(d.message);
             } catch (err) {
               console.error(err);
-              msgPurchase.textContent = `購入エラー:${err.message}`;
-              msgPurchase.className = "error";
+              msgPur.textContent = `購入エラー:${err.message}`;
+              msgPur.className = "error";
             } finally {
               btn.disabled = false;
             }
@@ -399,7 +396,7 @@
         );
 
         // 情報修正
-        logoutButton.addEventListener("click", () => {
+        btnLogout.addEventListener("click", () => {
           if (confirm("登録情報を削除して戻りますか？")) {
             [
               "userName",
@@ -412,7 +409,7 @@
         });
 
         // 閉じる
-        closeButton.addEventListener("click", () => liff.closeWindow());
+        btnClose.addEventListener("click", () => liff.closeWindow());
       });
     </script>
   </body>
