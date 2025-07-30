@@ -13,7 +13,6 @@
       rel="stylesheet"
     />
     <style>
-      /* --- CSSは変更ありません --- */
       html {
         box-sizing: border-box;
         height: 100%;
@@ -43,7 +42,6 @@
         gap: 1rem;
         background: rgba(255, 255, 255, 0.8);
         backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
         border-radius: 1.25rem;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
         padding: 2rem 1.5rem;
@@ -107,9 +105,6 @@
         cursor: pointer;
         transition: transform 0.2s, box-shadow 0.2s;
       }
-      .photo-select-button {
-        background: linear-gradient(to right, #3b82f6, #2563eb);
-      }
       button:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 16px rgba(0, 177, 79, 0.2);
@@ -119,6 +114,9 @@
         cursor: not-allowed;
         transform: none;
         box-shadow: none;
+      }
+      .photo-select-button {
+        background: linear-gradient(to right, #3b82f6, #2563eb);
       }
       #statusMessage,
       #purchaseStatus {
@@ -178,7 +176,6 @@
         <p class="subtitle">お名前と社員証の写真を登録してください</p>
         <label for="nameInput">お名前</label>
         <input type="text" id="nameInput" placeholder="例：山田 太郎" />
-
         <label for="photoInput">社員証の写真</label>
         <input
           type="file"
@@ -195,147 +192,232 @@
         </button>
         <img
           id="imagePreview"
-          src=""
-          alt="写真プレビュー"
           style="
             display: none;
             max-width: 100%;
             margin-top: 1rem;
             border-radius: 0.5rem;
           "
+          alt="プレビュー"
         />
         <button id="submitButton">登録</button>
         <div id="statusMessage"></div>
       </section>
-
       <section
         id="purchaseSection"
         class="glass"
         style="display: none; flex-direction: column; gap: 1rem"
       >
-        ...
+        <div class="userInfoDisplay" style="display: none"></div>
+        <h1>お弁当の注文</h1>
+        <div class="bento-description">
+          プロドライバー専用弁当<br />￥300（税込）
+        </div>
+        <button
+          class="purchase-button"
+          data-bento-name="プロドライバー専用弁当"
+        >
+          購入する
+        </button>
+        <div id="purchaseStatus"></div>
+        <button id="logoutButton">登録情報を修正する</button>
       </section>
       <section
         id="completeSection"
         class="glass"
         style="display: none; text-align: center"
       >
-        ...
+        <div class="userInfoDisplay" style="display: none"></div>
+        <h1>購入が完了しました！</h1>
+        <p class="subtitle">スタッフに画面を提示してください</p>
+        <p
+          id="purchaseTimestampDisplay"
+          class="subtitle"
+          style="font-weight: 600"
+        ></p>
+        <p id="purchaseIdDisplay" class="subtitle" style="font-weight: 600"></p>
+        <button id="closeButton">スタッフ確認</button>
       </section>
     </div>
-
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // ===== LIFF初期化 =====
-        const liffId = "2007755942-oQ4lzEn9"; // あなたのLIFF ID
-        liff
-          .init({ liffId })
-          .then(() => console.log("✅ LIFF OK"))
-          .catch((e) => console.error("❌ LIFF NG", e));
+      document.addEventListener("DOMContentLoaded", async () => {
+        const liffId = "2007755942-oQ4lzEn9";
+        await liff.init({ liffId });
+        console.log("✅ LIFF OK");
 
-        // ===== 要素取得 =====
         const registrationSection = document.getElementById(
           "registrationSection"
         );
         const purchaseSection = document.getElementById("purchaseSection");
+        const completeSection = document.getElementById("completeSection");
         const nameInput = document.getElementById("nameInput");
-        const submitButton = document.getElementById("submitButton");
-        const statusMessage = document.getElementById("statusMessage");
-
-        // ▼▼▼ 変更点2：写真関連の要素を取得 ▼▼▼
         const photoInput = document.getElementById("photoInput");
         const photoSelectButton = document.getElementById("photoSelectButton");
         const imagePreview = document.getElementById("imagePreview");
-        let photoData = null; // 画像データを保存する変数
-        // ▲▲▲ 変更ここまで ▲▲▲
-
+        const submitButton = document.getElementById("submitButton");
+        const statusMessage = document.getElementById("statusMessage");
+        const purchaseButtons = document.querySelectorAll(".purchase-button");
+        const purchaseStatus = document.getElementById("purchaseStatus");
+        const logoutButton = document.getElementById("logoutButton");
+        const closeButton = document.getElementById("closeButton");
+        const purchaseTimestampDisplay = document.getElementById(
+          "purchaseTimestampDisplay"
+        );
+        const purchaseIdDisplay = document.getElementById("purchaseIdDisplay");
+        const userInfoDisplays = document.querySelectorAll(".userInfoDisplay");
         const GAS_URL =
-          "https://script.google.com/macros/s/AKfycbyiwSRRttuwQxmUBn8diULicYPDQl950nsi-pC4l2RuTJUCklV_XIZ3SuGSg0LqM_S3cA/exec"; // あなたのGAS URL
+          "https://script.google.com/macros/s/AKfycbyiwSRRttuwQxmUBn8diULicYPDQl950nsi-pC4l2RuTJUCklV_XIZ3SuGSg0LqM_S3cA/exec";
 
-        // (ページ切り替え等の関数は省略)
-        function showPage(page) {
-          /* ... */
-        }
         function updateUserInfoDisplay() {
-          /* ... */
+          const name = localStorage.getItem("userName");
+          const employeeId = localStorage.getItem("employeeId");
+          userInfoDisplays.forEach((el) => {
+            if (name && employeeId) {
+              el.textContent = `社員番号: ${employeeId} | 名前: ${name}`;
+              el.style.display = "block";
+            } else {
+              el.style.display = "none";
+            }
+          });
         }
 
-        // ===== 初期表示 =====
-        if (localStorage.getItem("employeeId")) {
-          showPage("purchase");
-        } else {
-          showPage("registration");
+        function showPage(page) {
+          registrationSection.style.display = "none";
+          purchaseSection.style.display = "none";
+          completeSection.style.display = "none";
+          if (page === "purchase") purchaseSection.style.display = "flex";
+          else if (page === "complete") {
+            completeSection.style.display = "flex";
+            const ts = localStorage.getItem("purchaseTimestamp");
+            const pid = localStorage.getItem("purchaseId");
+            purchaseTimestampDisplay.textContent = ts ? `購入日時: ${ts}` : "";
+            purchaseIdDisplay.textContent = pid ? `購入ID: ${pid}` : "";
+          } else registrationSection.style.display = "flex";
+          updateUserInfoDisplay();
         }
 
-        // ▼▼▼ 変更点3：写真選択の処理を追加 ▼▼▼
-        photoSelectButton.addEventListener("click", () => {
-          photoInput.click(); // 隠れているファイル入力をクリック
-        });
+        // 初期表示
+        if (localStorage.getItem("employeeId")) showPage("purchase");
+        else showPage("registration");
 
-        photoInput.addEventListener("change", (event) => {
-          const file = event.target.files[0];
+        // 写真選択
+        photoSelectButton.addEventListener("click", () => photoInput.click());
+        photoInput.addEventListener("change", (e) => {
+          const file = e.target.files[0];
           if (!file) return;
-
           const reader = new FileReader();
-          reader.onload = (e) => {
-            imagePreview.src = e.target.result;
+          reader.onload = (ev) => {
+            imagePreview.src = ev.target.result;
             imagePreview.style.display = "block";
-            photoData = e.target.result; // Base64形式の画像データを保存
+            photoData = ev.target.result;
           };
           reader.readAsDataURL(file);
         });
-        // ▲▲▲ 変更ここまで ▲▲▲
 
-        // ▼▼▼ 変更点4：登録ボタンの処理を写真送信用に全面的に修正 ▼▼▼
-        submitButton.addEventListener("click", () => {
+        // 登録処理
+        let photoData = null;
+        submitButton.addEventListener("click", async () => {
           const name = nameInput.value.trim();
-
           if (!name || !photoData) {
-            statusMessage.textContent =
-              "⚠️ 名前と社員証の写真を選択してください。";
+            statusMessage.textContent = "⚠️ 名前と写真を選択してください";
             statusMessage.className = "error";
             return;
           }
-
           submitButton.disabled = true;
-          statusMessage.textContent = "📡 画像を解析・登録中...";
+          statusMessage.textContent = "📡 登録中...";
           statusMessage.className = "";
-
-          const postData = {
-            action: "registerWithPhoto",
-            name: name,
-            photo: photoData, // Base64形式の画像データ
-          };
-
-          fetch(GAS_URL, {
-            method: "POST",
-            body: JSON.stringify(postData),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.result === "success" && data.employeeId) {
-                localStorage.setItem("userName", name);
-                localStorage.setItem("employeeId", data.employeeId); // 読み取った社員番号を保存
-                updateUserInfoDisplay();
-                statusMessage.textContent = `✅ 登録完了！社員番号: ${data.employeeId}`;
-                statusMessage.className = "success";
-                setTimeout(() => showPage("purchase"), 1500); // 1.5秒後に購入ページへ
-              } else {
-                throw new Error(data.message || "登録に失敗しました。");
-              }
-            })
-            .catch((error) => {
-              console.error("❌ 登録エラー:", error);
-              statusMessage.textContent = `登録エラー: ${error.message}`;
-              statusMessage.className = "error";
-            })
-            .finally(() => {
-              submitButton.disabled = false;
+          try {
+            const res = await fetch(GAS_URL, {
+              method: "POST",
+              mode: "cors",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                action: "registerWithPhoto",
+                name,
+                photo: photoData,
+              }),
             });
+            const data = await res.json();
+            if (data.result === "success") {
+              localStorage.setItem("userName", name);
+              localStorage.setItem("employeeId", data.employeeId);
+              statusMessage.textContent = `✅ 登録完了！社員番号:${data.employeeId}`;
+              statusMessage.className = "success";
+              setTimeout(() => showPage("purchase"), 1500);
+            } else throw new Error(data.message);
+          } catch (err) {
+            console.error(err);
+            statusMessage.textContent = `登録エラー:${err.message}`;
+            statusMessage.className = "error";
+          } finally {
+            submitButton.disabled = false;
+          }
         });
-        // ▲▲▲ 変更ここまで ▲▲▲
 
-        // (購入ボタンやログアウトボタンなどの処理は変更なしのため省略)
+        // 購入処理
+        purchaseButtons.forEach((btn) =>
+          btn.addEventListener("click", async () => {
+            if (!confirm(`${btn.dataset.bentoName}を購入しますか？`)) return;
+            btn.disabled = true;
+            purchaseStatus.textContent = "📡 購入中...";
+            purchaseStatus.className = "";
+            try {
+              if (!liff.isLoggedIn()) await liff.login();
+              const profile = await liff.getProfile();
+              const now = new Date();
+              const ts = `${now.getFullYear()}/${String(
+                now.getMonth() + 1
+              ).padStart(2, "0")}/${String(now.getDate()).padStart(
+                2,
+                "0"
+              )} ${String(now.getHours()).padStart(2, "0")}:${String(
+                now.getMinutes()
+              ).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+              localStorage.setItem("purchaseTimestamp", ts);
+              const body = {
+                action: "purchase",
+                name: localStorage.getItem("userName"),
+                employeeId: localStorage.getItem("employeeId"),
+                bentoName: btn.dataset.bentoName,
+                userId: profile.userId,
+              };
+              const resp = await fetch(GAS_URL, {
+                method: "POST",
+                mode: "cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+              });
+              const d = await resp.json();
+              if (d.result === "success") {
+                localStorage.setItem("purchaseId", d.purchaseId);
+                showPage("complete");
+              } else throw new Error(d.message);
+            } catch (err) {
+              console.error(err);
+              purchaseStatus.textContent = `購入エラー:${err.message}`;
+              purchaseStatus.className = "error";
+            } finally {
+              btn.disabled = false;
+            }
+          })
+        );
+
+        // 情報修正
+        logoutButton.addEventListener("click", () => {
+          if (confirm("登録情報を削除して戻りますか？")) {
+            [
+              "userName",
+              "employeeId",
+              "purchaseTimestamp",
+              "purchaseId",
+            ].forEach((k) => localStorage.removeItem(k));
+            updateUserInfoDisplay();
+            showPage("registration");
+          }
+        });
+
+        // 閉じる
+        closeButton.addEventListener("click", () => liff.closeWindow());
       });
     </script>
   </body>
