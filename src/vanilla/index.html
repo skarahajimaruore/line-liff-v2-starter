@@ -8,32 +8,19 @@
     />
     <title>プロドライバー弁当申請</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
-      rel="stylesheet"
-    />
     <style>
-      html {
-        box-sizing: border-box;
-        height: 100%;
-      }
-      *,
-      *::before,
-      *::after {
-        box-sizing: inherit;
-      }
+      /* CSSは変更ありません */
       body {
         margin: 0;
         padding: 0;
-        height: 100%;
-        font-family: "Inter", sans-serif;
-        background: linear-gradient(135deg, #e0f7f3, #f5fdfb);
+        font-family: sans-serif;
+        background: #f0f0f0;
       }
       .wrapper {
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 100%;
+        min-height: 100vh;
         padding: 1rem;
       }
       .glass {
@@ -41,387 +28,231 @@
         flex-direction: column;
         gap: 1rem;
         background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(16px);
-        border-radius: 1.25rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-        padding: 2rem 1.5rem;
+        backdrop-filter: blur(10px);
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
         width: 100%;
-        max-width: 340px;
-        animation: fadeIn 0.5s ease-in-out;
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
+        max-width: 320px;
       }
       h1 {
         margin: 0;
-        font-size: 1.6rem;
-        font-weight: 700;
+        font-size: 1.5rem;
         text-align: center;
-        color: #1f2937;
       }
       .subtitle {
-        margin: 0 0 1rem;
         font-size: 0.9rem;
         text-align: center;
-        color: #6b7280;
-        line-height: 1.5;
+        color: #555;
+        margin-bottom: 1rem;
       }
-      label {
-        margin: 0;
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #374151;
-      }
-      input[type="text"] {
+      label,
+      input,
+      button {
+        display: block;
         width: 100%;
-        padding: 0.9rem 1rem;
-        font-size: 1rem;
-        border: 1px solid #d1d5db;
-        border-radius: 0.6rem;
-        background: #fff;
-        transition: border 0.2s, box-shadow 0.2s;
       }
-      input[type="text"]:focus {
-        border-color: #06c755;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(6, 199, 85, 0.2);
+      input {
+        padding: 0.8rem;
+        margin-top: 0.3rem;
+        border: 1px solid #ccc;
+        border-radius: 0.5rem;
       }
       button {
-        width: 100%;
-        padding: 1rem;
-        font-size: 1.05rem;
-        font-weight: 600;
-        color: #fff;
-        background: linear-gradient(to right, #06c755, #00b14f);
+        padding: 0.8rem;
         border: none;
-        border-radius: 0.6rem;
+        border-radius: 0.5rem;
+        background-color: #00b900;
+        color: white;
+        font-weight: bold;
         cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-      }
-      button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(0, 177, 79, 0.2);
+        margin-top: 1rem;
       }
       button:disabled {
-        background: #d1d5db;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-      }
-      .photo-select-button {
-        background: linear-gradient(to right, #3b82f6, #2563eb);
+        background-color: #ccc;
       }
       #statusMessage,
       #purchaseStatus {
-        margin-top: 0.5rem;
-        font-size: 0.9rem;
-        font-weight: 600;
         text-align: center;
         min-height: 1.2em;
+        font-weight: bold;
       }
       .success {
-        color: #10b981;
+        color: green;
       }
       .error {
-        color: #ef4444;
-      }
-      .purchase-button {
-        padding: 0.5rem 1rem;
-        font-size: 0.9rem;
-        background: linear-gradient(to right, #2563eb, #1d4ed8);
-      }
-      .purchase-button:disabled {
-        background: #d1d5db;
-      }
-      #logoutButton,
-      #closeButton {
-        margin-top: 1rem;
-        font-size: 0.9rem;
-        background: linear-gradient(to right, #6b7280, #4b5563);
-      }
-      .bento-description {
-        text-align: center;
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #374151;
-        background: #f9fafb;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border: 1px solid #e5e7eb;
-        line-height: 1.6;
-      }
-      .userInfoDisplay {
-        font-size: 0.8rem;
-        color: #4b5563;
-        text-align: center;
-        padding: 0.5rem;
-        background: rgba(209, 213, 219, 0.5);
-        border-radius: 0.5rem;
-        margin-bottom: 1rem;
+        color: red;
       }
     </style>
   </head>
   <body>
     <div class="wrapper">
-      <!-- 登録フォーム -->
       <section id="registrationSection" class="glass">
-        <div class="userInfoDisplay" style="display: none"></div>
         <h1>情報登録フォーム</h1>
-        <p class="subtitle">お名前と社員証の写真を登録してください</p>
+        <p class="subtitle">お名前と社員番号を入力してください</p>
         <label for="nameInput">お名前</label>
         <input type="text" id="nameInput" placeholder="例：山田 太郎" />
-        <label for="photoInput">社員証の写真</label>
-        <input
-          type="file"
-          id="photoInput"
-          accept="image/*"
-          style="display: none"
-        />
-        <button
-          type="button"
-          id="photoSelectButton"
-          class="photo-select-button"
-        >
-          写真を選択または撮影
-        </button>
-        <img
-          id="imagePreview"
-          alt="プレビュー"
-          style="
-            display: none;
-            max-width: 100%;
-            margin-top: 1rem;
-            border-radius: 0.5rem;
-          "
-        />
+        <label for="employeeIdInput">社員番号</label>
+        <input type="text" id="employeeIdInput" placeholder="例：12345" />
         <button id="submitButton">登録</button>
         <div id="statusMessage"></div>
       </section>
 
-      <!-- 購入フォーム -->
-      <section
-        id="purchaseSection"
-        class="glass"
-        style="display: none; flex-direction: column; gap: 1rem"
-      >
-        <div class="userInfoDisplay" style="display: none"></div>
+      <section id="purchaseSection" class="glass" style="display: none">
         <h1>お弁当の注文</h1>
-        <div class="bento-description">
-          プロドライバー専用弁当<br />￥300（税込）
-        </div>
+        <p id="userInfoDisplay" class="subtitle"></p>
         <button
           class="purchase-button"
           data-bento-name="プロドライバー専用弁当"
         >
-          購入する
+          プロドライバー専用弁当を購入する
         </button>
         <div id="purchaseStatus"></div>
-        <button id="logoutButton">登録情報を修正する</button>
+        <button id="logoutButton" style="background-color: #555">
+          登録情報を修正
+        </button>
       </section>
 
-      <!-- 完了画面 -->
       <section
         id="completeSection"
         class="glass"
         style="display: none; text-align: center"
       >
-        <div class="userInfoDisplay" style="display: none"></div>
         <h1>購入が完了しました！</h1>
-        <p class="subtitle">スタッフに画面を提示してください</p>
-        <p
-          id="purchaseTimestampDisplay"
-          class="subtitle"
-          style="font-weight: 600"
-        ></p>
-        <p id="purchaseIdDisplay" class="subtitle" style="font-weight: 600"></p>
-        <button id="closeButton">スタッフ確認</button>
+        <p class="subtitle">スタッフに画面を提示して下さい</p>
+        <p id="purchaseIdDisplay"></p>
+        <button id="closeButton">閉じる</button>
       </section>
     </div>
 
     <script>
       document.addEventListener("DOMContentLoaded", async () => {
+        // ▼▼▼ あなたの情報を設定してください ▼▼▼
         const liffId = "2007755942-oQ4lzEn9";
+        const gasWebAppUrl =
+          "https://script.google.com/macros/s/AKfycbzAiXSRgGZfzOztaK6LuG3cMCtd6eG_-H4H7KyPIfwPcVk69OLBv2b_kmY1muwTdjVrAw/exec";
+        // ▲▲▲ 設定はここまで ▲▲▲
+
         await liff.init({ liffId });
 
-        const regSec = document.getElementById("registrationSection");
-        const purSec = document.getElementById("purchaseSection");
-        const comSec = document.getElementById("completeSection");
-        const nameEl = document.getElementById("nameInput");
-        const fileEl = document.getElementById("photoInput");
-        const btnFile = document.getElementById("photoSelectButton");
-        const imgPrev = document.getElementById("imagePreview");
-        const btnReg = document.getElementById("submitButton");
-        const msgReg = document.getElementById("statusMessage");
-        const btnPurchases = document.querySelectorAll(".purchase-button");
-        const msgPur = document.getElementById("purchaseStatus");
-        const btnLogout = document.getElementById("logoutButton");
-        const btnClose = document.getElementById("closeButton");
-        const tsEl = document.getElementById("purchaseTimestampDisplay");
-        const pidEl = document.getElementById("purchaseIdDisplay");
-        const infoEls = document.querySelectorAll(".userInfoDisplay");
+        const registrationSection = document.getElementById(
+          "registrationSection"
+        );
+        const purchaseSection = document.getElementById("purchaseSection");
+        const completeSection = document.getElementById("completeSection");
+        const nameInput = document.getElementById("nameInput");
+        const employeeIdInput = document.getElementById("employeeIdInput");
+        const submitButton = document.getElementById("submitButton");
+        const statusMessage = document.getElementById("statusMessage");
+        const userInfoDisplay = document.getElementById("userInfoDisplay");
+        const purchaseButtons = document.querySelectorAll(".purchase-button");
+        const purchaseStatus = document.getElementById("purchaseStatus");
+        const logoutButton = document.getElementById("logoutButton");
+        const purchaseIdDisplay = document.getElementById("purchaseIdDisplay");
+        const closeButton = document.getElementById("closeButton");
 
-        // ここを必ず最新のexec URLに置き換えてください
-        const GAS_URL =
-          "https://script.google.com/macros/s/AKfycbxOZgVEYeocZhxWb-8ojfMQ7zOkLi6sllTgGtAFbXmII5ZcsHzFGiAKS0kQbPkgf5MqAA/exec";
+        function showPage(page) {
+          registrationSection.style.display = "none";
+          purchaseSection.style.display = "none";
+          completeSection.style.display = "none";
 
-        function updateInfo() {
-          const u = localStorage.getItem("userName");
-          const e = localStorage.getItem("employeeId");
-          infoEls.forEach((el) => {
-            if (u && e) {
-              el.textContent = `社員番号: ${e} | 名前: ${u}`;
-              el.style.display = "block";
-            } else el.style.display = "none";
-          });
-        }
-
-        function show(page) {
-          regSec.style.display =
-            purSec.style.display =
-            comSec.style.display =
-              "none";
           if (page === "purchase") {
-            purSec.style.display = "flex";
+            userInfoDisplay.textContent = `ようこそ、${localStorage.getItem(
+              "userName"
+            )}さん`;
+            purchaseSection.style.display = "flex";
           } else if (page === "complete") {
-            comSec.style.display = "flex";
-            tsEl.textContent = localStorage.getItem("purchaseTimestamp") || "";
-            pidEl.textContent = localStorage.getItem("purchaseId") || "";
+            purchaseIdDisplay.textContent = `購入ID: ${localStorage.getItem(
+              "purchaseId"
+            )}`;
+            completeSection.style.display = "flex";
           } else {
-            regSec.style.display = "flex";
+            registrationSection.style.display = "flex";
           }
-          updateInfo();
         }
 
-        // 初期表示
-        show(localStorage.getItem("employeeId") ? "purchase" : "registration");
+        if (localStorage.getItem("employeeId")) {
+          showPage("purchase");
+        } else {
+          showPage("registration");
+        }
 
-        // 写真選択
-        let photoData = null;
-        btnFile.addEventListener("click", () => fileEl.click());
-        fileEl.addEventListener("change", (e) => {
-          const f = e.target.files[0];
-          if (!f) return;
-          const fr = new FileReader();
-          fr.onload = (ev) => {
-            imgPrev.src = ev.target.result;
-            imgPrev.style.display = "block";
-            photoData = ev.target.result;
-          };
-          fr.readAsDataURL(f);
-        });
-
-        // 登録処理
-        btnReg.addEventListener("click", async () => {
-          const n = nameEl.value.trim();
-          if (!n || !photoData) {
-            msgReg.textContent = "⚠️ 名前と写真を選択してください";
-            msgReg.className = "error";
+        submitButton.addEventListener("click", async () => {
+          const name = nameInput.value.trim();
+          const employeeId = employeeIdInput.value.trim();
+          if (!name || !employeeId) {
+            statusMessage.textContent = "名前と社員番号を入力してください。";
+            statusMessage.className = "error";
             return;
           }
-          btnReg.disabled = true;
-          msgReg.textContent = "📡 登録中...";
-          msgReg.className = "";
+          submitButton.disabled = true;
+          statusMessage.textContent = "登録中...";
           try {
-            const res = await fetch(GAS_URL, {
+            const response = await fetch(gasWebAppUrl, {
               method: "POST",
-              body: JSON.stringify({
-                action: "registerWithPhoto",
-                name: n,
-                photo: photoData,
-              }),
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ action: "register", name, employeeId }),
             });
-            const d = await res.json();
-            if (d.result === "success") {
-              localStorage.setItem("userName", n);
-              localStorage.setItem("employeeId", d.employeeId);
-              msgReg.textContent = `✅ 登録完了！社員番号:${d.employeeId}`;
-              msgReg.className = "success";
-              setTimeout(() => show("purchase"), 1500);
-            } else {
-              throw new Error(d.message);
-            }
-          } catch (err) {
-            console.error(err);
-            msgReg.textContent = `登録エラー:${err.message}`;
-            msgReg.className = "error";
+            const data = await response.json();
+            if (data.result !== "success") throw new Error(data.message);
+
+            localStorage.setItem("userName", name);
+            localStorage.setItem("employeeId", employeeId);
+            showPage("purchase");
+          } catch (error) {
+            statusMessage.textContent = `登録エラー: ${error.message}`;
+            statusMessage.className = "error";
           } finally {
-            btnReg.disabled = false;
+            submitButton.disabled = false;
           }
         });
 
-        // 購入処理
-        btnPurchases.forEach((btn) =>
-          btn.addEventListener("click", async () => {
-            if (!confirm(`${btn.dataset.bentoName}を購入しますか？`)) return;
-            btn.disabled = true;
-            msgPur.textContent = "📡 購入中...";
-            msgPur.className = "";
+        purchaseButtons.forEach((button) => {
+          button.addEventListener("click", async () => {
+            const bentoName = button.dataset.bentoName;
+            if (!confirm(`${bentoName}を購入しますか？`)) return;
+
+            button.disabled = true;
+            purchaseStatus.textContent = "購入処理中...";
             try {
               if (!liff.isLoggedIn()) await liff.login();
-              const prof = await liff.getProfile();
-              const now = new Date();
-              const ts =
-                [
-                  now.getFullYear(),
-                  ("0" + (now.getMonth() + 1)).slice(-2),
-                  ("0" + now.getDate()).slice(-2),
-                ].join("/") +
-                " " +
-                [
-                  ("0" + now.getHours()).slice(-2),
-                  ("0" + now.getMinutes()).slice(-2),
-                  ("0" + now.getSeconds()).slice(-2),
-                ].join(":");
-              localStorage.setItem("purchaseTimestamp", ts);
-              const res2 = await fetch(GAS_URL, {
+              const profile = await liff.getProfile();
+              const postData = {
+                action: "purchase",
+                name: localStorage.getItem("userName"),
+                employeeId: localStorage.getItem("employeeId"),
+                bentoName: bentoName,
+                userId: profile.userId,
+              };
+              const response = await fetch(gasWebAppUrl, {
                 method: "POST",
-                body: JSON.stringify({
-                  action: "purchase",
-                  name: localStorage.getItem("userName"),
-                  employeeId: localStorage.getItem("employeeId"),
-                  bentoName: btn.dataset.bentoName,
-                  userId: prof.userId,
-                }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(postData),
               });
-              const d2 = await res2.json();
-              if (d2.result === "success") {
-                localStorage.setItem("purchaseId", d2.purchaseId);
-                show("complete");
-              } else {
-                throw new Error(d2.message);
-              }
-            } catch (err) {
-              console.error(err);
-              msgPur.textContent = `購入エラー:${err.message}`;
-              msgPur.className = "error";
-            } finally {
-              btn.disabled = false;
-            }
-          })
-        );
+              const data = await response.json();
+              if (data.result !== "success") throw new Error(data.message);
 
-        // 登録情報修正
-        btnLogout.addEventListener("click", () => {
-          if (confirm("登録情報を削除して戻りますか？")) {
-            [
-              "userName",
-              "employeeId",
-              "purchaseTimestamp",
-              "purchaseId",
-            ].forEach((k) => localStorage.removeItem(k));
-            show("registration");
+              localStorage.setItem("purchaseId", data.purchaseId);
+              showPage("complete");
+            } catch (error) {
+              purchaseStatus.textContent = `購入エラー: ${error.message}`;
+              purchaseStatus.className = "error";
+            } finally {
+              button.disabled = false;
+            }
+          });
+        });
+
+        logoutButton.addEventListener("click", () => {
+          if (confirm("登録情報を削除して入力画面に戻りますか？")) {
+            localStorage.removeItem("userName");
+            localStorage.removeItem("employeeId");
+            localStorage.removeItem("purchaseId");
+            showPage("registration");
           }
         });
 
-        // 閉じる
-        btnClose.addEventListener("click", () => liff.closeWindow());
+        closeButton.addEventListener("click", () => liff.closeWindow());
       });
     </script>
   </body>
