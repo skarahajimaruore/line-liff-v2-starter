@@ -13,7 +13,6 @@
       rel="stylesheet"
     />
     <style>
-      /* --- CSSは変更ありません --- */
       html {
         box-sizing: border-box;
         height: 100%;
@@ -223,6 +222,7 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         // ===== LIFF初期化 =====
+        // ご自身のLIFF IDに書き換えてください
         const liffId = "2007755942-oQ4lzEn9";
         liff
           .init({ liffId })
@@ -246,13 +246,13 @@
         const purchaseTimestampDisplay = document.getElementById(
           "purchaseTimestampDisplay"
         );
-        // ★★★ 購入ID表示用の要素を取得 ★★★
         const purchaseIdDisplay = document.getElementById("purchaseIdDisplay");
         const userInfoDisplays = document.querySelectorAll(".userInfoDisplay");
 
-        // ★★★ GASのURLはご自身のものに設定してください
+        // ===== GASのURL =====
+        // ご自身のGoogle Apps ScriptのWebアプリURLに書き換えてください
         const GAS_URL =
-          "https://script.google.com/macros/s/AKfycby5yGi1u5JjuVKCrX4e7pFXHJMDFO09fg_2B3JqCpf3DSR7RV5c2A7Ka7iiyWZEu0vQzw/exec";
+          "https://script.google.com/macros/s/AKfycbzQcnXuYtEDnyaMve5mFHR77cbgBwE_BqpGDJSWZ0t-1Nv7wJvu5B-bgFM9OiQQRaQhzg/exec";
 
         // ===== ユーザー情報更新 =====
         function updateUserInfoDisplay() {
@@ -285,7 +285,6 @@
             if (timestamp) {
               purchaseTimestampDisplay.textContent = `購入日時: ${timestamp}`;
             }
-            // ★★★ localStorageから購入IDを取得して表示する処理を追加 ★★★
             const purchaseId = localStorage.getItem("purchaseId");
             if (purchaseId) {
               purchaseIdDisplay.textContent = `購入ID: ${purchaseId}`;
@@ -322,7 +321,6 @@
             action: "register",
           });
 
-          // ★★★ fetchを修正: no-corsを削除し、JSONレスポンスを処理 ★★★
           fetch(GAS_URL, {
             method: "POST",
             body: params,
@@ -397,7 +395,6 @@
                 userId: userId,
               });
 
-              // ★★★ fetchを修正: no-corsを削除し、JSONレスポンスを処理 ★★★
               const response = await fetch(GAS_URL, {
                 method: "POST",
                 body: params,
@@ -406,7 +403,6 @@
               const data = await response.json();
 
               if (data.result === "success" && data.purchaseId) {
-                // ★★★ 購入IDをlocalStorageに保存 ★★★
                 localStorage.setItem("purchaseId", data.purchaseId);
                 showPage("complete");
               } else {
@@ -428,7 +424,6 @@
             localStorage.removeItem("userName");
             localStorage.removeItem("employeeId");
             localStorage.removeItem("purchaseTimestamp");
-            // ★★★ 購入IDも消去 ★★★
             localStorage.removeItem("purchaseId");
             updateUserInfoDisplay();
             showPage("registration");
