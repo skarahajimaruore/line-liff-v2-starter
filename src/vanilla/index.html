@@ -193,13 +193,13 @@
         </button>
         <img
           id="imagePreview"
+          alt="プレビュー"
           style="
             display: none;
             max-width: 100%;
             margin-top: 1rem;
             border-radius: 0.5rem;
           "
-          alt="プレビュー"
         />
         <button id="submitButton">登録</button>
         <div id="statusMessage"></div>
@@ -249,7 +249,6 @@
       document.addEventListener("DOMContentLoaded", async () => {
         const liffId = "2007755942-oQ4lzEn9";
         await liff.init({ liffId });
-        console.log("✅ LIFF OK");
 
         const regSec = document.getElementById("registrationSection");
         const purSec = document.getElementById("purchaseSection");
@@ -267,8 +266,10 @@
         const tsEl = document.getElementById("purchaseTimestampDisplay");
         const pidEl = document.getElementById("purchaseIdDisplay");
         const infoEls = document.querySelectorAll(".userInfoDisplay");
+
+        // ここを必ず最新のexec URLに置き換えてください
         const GAS_URL =
-          "https://script.google.com/macros/s/AKfycbyKLH1FDuT783b4hYHNMmx6WJGT_5zUoUke-hJqeBTK-TtS-6LyKbNUQcbOwtzMDfJPKA/exec";
+          "https://script.google.com/macros/s/AKfycbxOZgVEYeocZhxWb-8ojfMQ7zOkLi6sllTgGtAFbXmII5ZcsHzFGiAKS0kQbPkgf5MqAA/exec";
 
         function updateInfo() {
           const u = localStorage.getItem("userName");
@@ -286,16 +287,19 @@
             purSec.style.display =
             comSec.style.display =
               "none";
-          if (page === "purchase")
-            (regSec.style.display = "none"), (purSec.style.display = "flex");
-          else if (page === "complete") {
+          if (page === "purchase") {
+            purSec.style.display = "flex";
+          } else if (page === "complete") {
             comSec.style.display = "flex";
             tsEl.textContent = localStorage.getItem("purchaseTimestamp") || "";
             pidEl.textContent = localStorage.getItem("purchaseId") || "";
-          } else regSec.style.display = "flex";
+          } else {
+            regSec.style.display = "flex";
+          }
           updateInfo();
         }
 
+        // 初期表示
         show(localStorage.getItem("employeeId") ? "purchase" : "registration");
 
         // 写真選択
@@ -313,7 +317,7 @@
           fr.readAsDataURL(f);
         });
 
-        // 登録
+        // 登録処理
         btnReg.addEventListener("click", async () => {
           const n = nameEl.value.trim();
           if (!n || !photoData) {
@@ -340,7 +344,9 @@
               msgReg.textContent = `✅ 登録完了！社員番号:${d.employeeId}`;
               msgReg.className = "success";
               setTimeout(() => show("purchase"), 1500);
-            } else throw new Error(d.message);
+            } else {
+              throw new Error(d.message);
+            }
           } catch (err) {
             console.error(err);
             msgReg.textContent = `登録エラー:${err.message}`;
@@ -350,7 +356,7 @@
           }
         });
 
-        // 購入
+        // 購入処理
         btnPurchases.forEach((btn) =>
           btn.addEventListener("click", async () => {
             if (!confirm(`${btn.dataset.bentoName}を購入しますか？`)) return;
@@ -361,16 +367,20 @@
               if (!liff.isLoggedIn()) await liff.login();
               const prof = await liff.getProfile();
               const now = new Date();
-              const ts = `${now.getFullYear()}/${String(
-                now.getMonth() + 1
-              ).padStart(2, "0")}/${String(now.getDate()).padStart(
-                2,
-                "0"
-              )} ${String(now.getHours()).padStart(2, "0")}:${String(
-                now.getMinutes()
-              ).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+              const ts =
+                [
+                  now.getFullYear(),
+                  ("0" + (now.getMonth() + 1)).slice(-2),
+                  ("0" + now.getDate()).slice(-2),
+                ].join("/") +
+                " " +
+                [
+                  ("0" + now.getHours()).slice(-2),
+                  ("0" + now.getMinutes()).slice(-2),
+                  ("0" + now.getSeconds()).slice(-2),
+                ].join(":");
               localStorage.setItem("purchaseTimestamp", ts);
-              const res = await fetch(GAS_URL, {
+              const res2 = await fetch(GAS_URL, {
                 method: "POST",
                 body: JSON.stringify({
                   action: "purchase",
@@ -380,11 +390,13 @@
                   userId: prof.userId,
                 }),
               });
-              const d = await res.json();
-              if (d.result === "success") {
-                localStorage.setItem("purchaseId", d.purchaseId);
+              const d2 = await res2.json();
+              if (d2.result === "success") {
+                localStorage.setItem("purchaseId", d2.purchaseId);
                 show("complete");
-              } else throw new Error(d.message);
+              } else {
+                throw new Error(d2.message);
+              }
             } catch (err) {
               console.error(err);
               msgPur.textContent = `購入エラー:${err.message}`;
@@ -395,7 +407,7 @@
           })
         );
 
-        // 情報修正
+        // 登録情報修正
         btnLogout.addEventListener("click", () => {
           if (confirm("登録情報を削除して戻りますか？")) {
             [
