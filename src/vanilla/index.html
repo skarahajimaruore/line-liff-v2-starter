@@ -181,6 +181,7 @@
           足柄SA店
         </button>
       </section>
+
       <section id="registrationSection" class="glass">
         <div class="userInfoDisplay" style="display: none"></div>
         <h1>情報登録フォーム</h1>
@@ -201,8 +202,7 @@
         <div class="userInfoDisplay" style="display: none"></div>
         <h1 id="storeNameDisplay"></h1>
         <div class="bento-description">
-          プロドライバー専用弁当<br />
-          ￥300（税込み）
+          プロドライバー専用弁当<br />￥300（税込み）
         </div>
         <button
           class="purchase-button"
@@ -211,7 +211,7 @@
           購入する
         </button>
         <div id="purchaseStatus"></div>
-        <button id="logoutButton">登録情報（名前・社員番号）を修正する</button>
+        <button id="logoutButton">登録情報を修正する</button>
       </section>
 
       <section
@@ -271,28 +271,45 @@
 
         let selectedStore = null;
 
-        // --- 関数定義 ---
         function updateUserInfoDisplay() {
-          /* ... */
+          const name = localStorage.getItem("userName");
+          const employeeId = localStorage.getItem("employeeId");
+          userInfoDisplays.forEach((el) => {
+            if (name && employeeId) {
+              el.textContent = `社員番号: ${employeeId} | 名前: ${name}`;
+              el.style.display = "block";
+            } else {
+              el.style.display = "none";
+            }
+          });
         }
+
         function showPage(page) {
-          /* ... */
-        }
+          storeSelectionSection.style.display = "none";
+          registrationSection.style.display = "none";
+          purchaseSection.style.display = "none";
+          completeSection.style.display = "none";
 
-        // ▼▼▼【変更点】ここから店舗識別ロジック ▼▼▼
-        function initializeApp() {
-          const urlParams = new URLSearchParams(window.location.search);
-          const storeParam = urlParams.get("store");
-
-          if (storeParam === "hamamatsu") {
-            selectedStore = "浜松SA店";
-            startMainFlow();
-          } else if (storeParam === "ashigara") {
-            selectedStore = "足柄SA店";
-            startMainFlow();
+          if (page === "storeSelection") {
+            storeSelectionSection.style.display = "flex";
+          } else if (page === "purchase") {
+            storeNameDisplay.textContent = selectedStore;
+            purchaseSection.style.display = "flex";
+          } else if (page === "complete") {
+            completeSection.style.display = "flex";
+            const timestamp = localStorage.getItem("purchaseTimestamp");
+            purchaseTimestampDisplay.textContent = timestamp
+              ? `購入日時: ${timestamp}`
+              : "";
+            const purchaseId = localStorage.getItem("purchaseId");
+            purchaseIdDisplay.textContent = purchaseId
+              ? `購入ID: ${purchaseId}`
+              : "";
           } else {
-            showPage("storeSelection");
+            // registration
+            registrationSection.style.display = "flex";
           }
+          updateUserInfoDisplay();
         }
 
         function startMainFlow() {
@@ -309,34 +326,33 @@
             startMainFlow();
           });
         });
-        // ▲▲▲ 店舗識別ロジックここまで ▲▲▲
 
-        // --- ページ切り替え関数 ---
-        function showPage(page) {
-          storeSelectionSection.style.display = "none";
-          registrationSection.style.display = "none";
-          purchaseSection.style.display = "none";
-          completeSection.style.display = "none";
+        function initializeApp() {
+          const urlParams = new URLSearchParams(window.location.search);
+          const storeParam = urlParams.get("store");
 
-          if (page === "storeSelection") {
-            storeSelectionSection.style.display = "flex";
-          } else if (page === "purchase") {
-            storeNameDisplay.textContent = selectedStore;
-            purchaseSection.style.display = "flex";
-          } else if (page === "complete") {
-            // (完了画面の処理は変更なし)
+          if (storeParam === "hamamatsu") {
+            selectedStore = "浜松SA店";
+            startMainFlow();
+          } else if (storeParam === "ashigara") {
+            selectedStore = "足柄SA店";
+            startMainFlow();
           } else {
-            // registration
-            registrationSection.style.display = "flex";
+            showPage("storeSelection");
           }
-          updateUserInfoDisplay();
         }
 
-        // --- 登録ボタンの処理 ---
         submitButton.addEventListener("click", async () => {
           const name = nameInput.value.trim();
           const employeeId = employeeIdInput.value.trim();
-          // (中略)
+          if (!name || !employeeId) {
+            statusMessage.textContent = "⚠️ 名前と社員番号を入力してください。";
+            statusMessage.className = "error";
+            return;
+          }
+          submitButton.disabled = true;
+          statusMessage.textContent = "📡 登録中...";
+          statusMessage.className = "";
           try {
             const response = await fetch(gasWebAppUrl, {
               method: "POST",
@@ -346,38 +362,96 @@
                 name,
                 employeeId,
                 store: selectedStore,
-              }), // store情報を追加
+              }),
             });
-            // (以下略)
+            const data = await response.json();
+            if (data.result !== "success") throw new Error(data.message);
+
+            localStorage.setItem("userName", name);
+            localStorage.setItem("employeeId", employeeId);
+            statusMessage.textContent = "✅ 登録完了！";
+            statusMessage.className = "success";
+            updateUserInfoDisplay();
+            setTimeout(() => showPage("purchase"), 500);
           } catch (error) {
-            /* ... */
+            statusMessage.textContent = `登録エラー: ${error.message}`;
+            statusMessage.className = "error";
+          } finally {
+            submitButton.disabled = false;
           }
         });
 
-        // --- 購入ボタンの処理 ---
         purchaseButtons.forEach((button) => {
           button.addEventListener("click", async () => {
-            // (中略)
+            if (
+              !confirm(
+                `${button.dataset.bentoName}を購入します。よろしいですか？`
+              )
+            )
+              return;
+            const name = localStorage.getItem("userName");
+            const employeeId = localStorage.getItem("employeeId");
+            if (!name || !employeeId) {
+              alert("情報がありません。登録画面に戻ります。");
+              return showPage("registration");
+            }
+            button.disabled = true;
+            purchaseStatus.textContent = "📡 購入処理中...";
+            purchaseStatus.className = "";
             try {
-              // (中略)
+              if (!liff.isLoggedIn()) await liff.login();
+              const profile = await liff.getProfile();
+              const now = new Date();
+              const formattedTimestamp = `${now.getFullYear()}/${String(
+                now.getMonth() + 1
+              ).padStart(2, "0")}/${String(now.getDate()).padStart(
+                2,
+                "0"
+              )} ${String(now.getHours()).padStart(2, "0")}:${String(
+                now.getMinutes()
+              ).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+              localStorage.setItem("purchaseTimestamp", formattedTimestamp);
+
               const response = await fetch(gasWebAppUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  // (中略)
+                  name,
+                  employeeId,
+                  bentoName: button.dataset.bentoName,
                   action: "purchase",
                   userId: profile.userId,
-                  store: selectedStore, // store情報を追加
+                  store: selectedStore,
                 }),
               });
-              // (以下略)
+              const data = await response.json();
+              if (data.result !== "success" || !data.purchaseId)
+                throw new Error(data.message);
+
+              localStorage.setItem("purchaseId", data.purchaseId);
+              showPage("complete");
             } catch (error) {
-              /* ... */
+              purchaseStatus.textContent = `購入エラー: ${error.message}`;
+              purchaseStatus.className = "error";
+            } finally {
+              button.disabled = false;
             }
           });
         });
 
-        // --- 初期化処理の呼び出し ---
+        logoutButton.addEventListener("click", () => {
+          if (confirm("記憶した情報を削除し、登録画面に戻りますか？")) {
+            localStorage.removeItem("userName");
+            localStorage.removeItem("employeeId");
+            localStorage.removeItem("purchaseTimestamp");
+            localStorage.removeItem("purchaseId");
+            updateUserInfoDisplay();
+            showPage("registration");
+          }
+        });
+
+        closeButton.addEventListener("click", () => liff.closeWindow());
+
         initializeApp();
       });
     </script>
