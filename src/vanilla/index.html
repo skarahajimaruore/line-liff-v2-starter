@@ -222,8 +222,7 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         // ===== LIFF初期化 =====
-        // ご自身のLIFF IDに書き換えてください
-        const liffId = "2007755942-oQ4lzEn9";
+        const liffId = "2007755942-oQ4lzEn9"; // ★ご自身のLIFF IDに書き換えてください
         liff
           .init({ liffId })
           .then(() => console.log("✅ LIFF OK"))
@@ -250,9 +249,8 @@
         const userInfoDisplays = document.querySelectorAll(".userInfoDisplay");
 
         // ===== GASのURL =====
-        // ご自身のGoogle Apps ScriptのWebアプリURLに書き換えてください
         const GAS_URL =
-          "https://script.google.com/macros/s/AKfycbxSQ-oD8QbeE_nRL0OvSDFRbZwapXzAgK8ecDkPk0_p7uCVlqcvPpNGl9IZ-RFe_KwZ_A/exec";
+          "https://script.google.com/macros/s/AKfycbzGKJB5kHPbiHYDUTVNfcZj3Uie9eg8T-F7pE77di7LNrGJB-pUn7K3B_LcXQ-hlZAJ/exec"; // ★ご自身のGASのURLに書き換えてください
 
         // ===== ユーザー情報更新 =====
         function updateUserInfoDisplay() {
@@ -315,15 +313,18 @@
           statusMessage.textContent = "📡 登録中...";
           statusMessage.className = "";
 
-          const params = new URLSearchParams({
+          const postData = {
             name: name,
             employeeId: employeeId,
             action: "register",
-          });
+          };
 
           fetch(GAS_URL, {
             method: "POST",
-            body: params,
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(postData),
           })
             .then((response) => response.json())
             .then((data) => {
@@ -387,17 +388,20 @@
               ).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
               localStorage.setItem("purchaseTimestamp", formattedTimestamp);
 
-              const params = new URLSearchParams({
+              const postData = {
                 name: name,
                 employeeId: employeeId,
                 bentoName: button.dataset.bentoName,
                 action: "purchase",
                 userId: userId,
-              });
+              };
 
               const response = await fetch(GAS_URL, {
                 method: "POST",
-                body: params,
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(postData),
               });
 
               const data = await response.json();
