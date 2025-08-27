@@ -223,7 +223,7 @@
       document.addEventListener("DOMContentLoaded", function () {
         // ===== LIFF初期化 =====
         // ご自身のLIFF IDに書き換えてください
-        const liffId = "2007755942-oQ4lzEn9"; // ★★★ 要変更 ★★★
+        const liffId = "2007755942-oQ4lzEn9";
         liff
           .init({ liffId })
           .then(() => console.log("✅ LIFF OK"))
@@ -252,7 +252,7 @@
         // ===== GASのURL =====
         // ご自身のGoogle Apps ScriptのWebアプリURLに書き換えてください
         const GAS_URL =
-          "https://script.google.com/macros/s/AKfycbxJvjU1CqtIjxAVTpaIq-Ektjy2aVOnQjw1BO_TVjbmet9mEfm-_nzoJXtWBsSasn5RBg/exec"; // ★★★ 要変更 ★★★
+          "https://script.google.com/macros/s/AKfycbySuyEp5f1qNDKDXorBF_bI6w4KVVh0z_4wQpZEB3fLMd6RSO76CmNyISH4DJxoybJ1gQ/exec";
 
         // ===== ユーザー情報更新 =====
         function updateUserInfoDisplay() {
@@ -315,18 +315,15 @@
           statusMessage.textContent = "📡 登録中...";
           statusMessage.className = "";
 
-          const postData = {
+          const params = new URLSearchParams({
             name: name,
             employeeId: employeeId,
             action: "register",
-          };
+          });
 
           fetch(GAS_URL, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(postData),
+            body: params,
           })
             .then((response) => response.json())
             .then((data) => {
@@ -390,20 +387,17 @@
               ).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
               localStorage.setItem("purchaseTimestamp", formattedTimestamp);
 
-              const postData = {
+              const params = new URLSearchParams({
                 name: name,
                 employeeId: employeeId,
                 bentoName: button.dataset.bentoName,
                 action: "purchase",
                 userId: userId,
-              };
+              });
 
               const response = await fetch(GAS_URL, {
                 method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify(postData),
+                body: params,
               });
 
               const data = await response.json();
