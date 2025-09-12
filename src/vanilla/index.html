@@ -164,6 +164,31 @@
         border-radius: 0.5rem;
         margin-bottom: 1rem;
       }
+      /* ===== 追加したスタイル ===== */
+      .store-selection {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 1rem;
+        background-color: #f9fafb;
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+      }
+      .store-selection legend {
+        font-weight: 600;
+        color: #374151;
+        padding: 0 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      .store-selection div {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .store-selection input[type="radio"] {
+        width: 1.2em;
+        height: 1.2em;
+      }
     </style>
   </head>
   <body>
@@ -191,6 +216,29 @@
           プロドライバー専用弁当<br />
           ￥300（税込み）
         </div>
+
+        <fieldset class="store-selection">
+          <legend>購入店舗を選択してください</legend>
+          <div>
+            <input
+              type="radio"
+              id="ashigara"
+              name="storeLocation"
+              value="足柄SA"
+              checked
+            />
+            <label for="ashigara">足柄SA</label>
+          </div>
+          <div>
+            <input
+              type="radio"
+              id="hamamatsu"
+              name="storeLocation"
+              value="浜松SA"
+            />
+            <label for="hamamatsu">浜松SA</label>
+          </div>
+        </fieldset>
         <button
           class="purchase-button"
           data-bento-name="プロドライバー専用弁当"
@@ -252,7 +300,7 @@
         // ===== GASのURL =====
         // ご自身のGoogle Apps ScriptのWebアプリURLに書き換えてください
         const GAS_URL =
-          "https://script.google.com/macros/s/AKfycbz28vWnEhdKkNW22fwojAFtaepDF1rsgGfzQM5FQ45tcP7En7cVXrxgsFyk3WPvJvLnLA/exec";
+          "https://script.google.com/macros/s/AKfycbw9VC7eUc3h1QM8UdTQVLBZ2LUW_txJBneDmn5GLB4Xp-CVztWvW8Z_OJpco-Sc_w4RZA/exec";
 
         // ===== ユーザー情報更新 =====
         function updateUserInfoDisplay() {
@@ -351,9 +399,20 @@
         // ===== 購入ボタン =====
         purchaseButtons.forEach((button) => {
           button.addEventListener("click", async () => {
+            // **ここから変更**
+            const selectedStore = document.querySelector(
+              'input[name="storeLocation"]:checked'
+            );
+            if (!selectedStore) {
+              alert("購入店舗を選択してください。");
+              return;
+            }
+            const storeLocation = selectedStore.value;
+            // **ここまで変更**
+
             if (
               !confirm(
-                `${button.dataset.bentoName}を購入します。よろしいですか？`
+                `${storeLocation}で「${button.dataset.bentoName}」を購入します。よろしいですか？` // 確認メッセージを修正
               )
             )
               return;
@@ -393,6 +452,7 @@
                 bentoName: button.dataset.bentoName,
                 action: "purchase",
                 userId: userId,
+                storeLocation: storeLocation, // **店舗情報を追加**
               });
 
               const response = await fetch(GAS_URL, {
