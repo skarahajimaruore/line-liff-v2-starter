@@ -196,10 +196,10 @@
       <section id="registrationSection" class="glass">
         <div class="userInfoDisplay" style="display: none"></div>
         <h1>情報登録フォーム</h1>
-        <p class="subtitle">お名前と社員番号を入力してください</p>
+        <p class="subtitle">お名前と事業所を入力してください</p>
         <label for="nameInput">お名前</label>
         <input type="text" id="nameInput" placeholder="例：山田 太郎" />
-        <label for="employeeIdInput">社員番号</label>
+        <label for="employeeIdInput">事業所</label>
         <input type="text" id="employeeIdInput" placeholder="例：12345" />
         <button id="submitButton">登録</button>
         <div id="statusMessage"></div>
@@ -245,7 +245,7 @@
           購入する
         </button>
         <div id="purchaseStatus"></div>
-        <button id="logoutButton">登録情報（名前・社員番号）を修正する</button>
+        <button id="logoutButton">登録情報（名前・事業所）を修正する</button>
       </section>
 
       <section
@@ -308,7 +308,7 @@
 
           if (name && employeeId) {
             userInfoDisplays.forEach((el) => {
-              el.textContent = `社員番号: ${employeeId} | 名前: ${name}`;
+              el.textContent = `事業所: ${employeeId} | 名前: ${name}`;
               el.style.display = "block";
             });
           } else {
@@ -354,7 +354,7 @@
           const name = nameInput.value.trim();
           const employeeId = employeeIdInput.value.trim();
           if (!name || !employeeId) {
-            statusMessage.textContent = "⚠️ 名前と社員番号を入力してください。";
+            statusMessage.textContent = "⚠️ 名前と事業所を入力してください。";
             statusMessage.className = "error";
             return;
           }
