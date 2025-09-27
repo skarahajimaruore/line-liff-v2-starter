@@ -189,6 +189,14 @@
         height: 1.2em;
       }
       /* ===== 追加したスタイル ===== */
+      .privacy-notice {
+        text-align: center;
+        font-size: 0.8rem;
+        color: #6b7280;
+        line-height: 1.5;
+        margin-top: 1.5rem; /* 入力欄とのスペース */
+        margin-bottom: 0.5rem; /* チェックボックスとのスペース */
+      }
       .agreement-checkbox {
         display: flex;
         align-items: center;
@@ -206,23 +214,22 @@
       <section id="registrationSection" class="glass">
         <div class="userInfoDisplay" style="display: none"></div>
         <h1>情報登録フォーム</h1>
-        <p class="subtitle">
-          お名前と事業所を入力してください<br />
-          <span style="font-size: 0.8em; color: #6b7280"
-            >※入力された情報は本施策のみに使用され、<br />他の目的で使用されることはありません。</span
-          >
-        </p>
+
+        <p class="subtitle">お名前と事業所を入力してください</p>
 
         <label for="nameInput">お名前</label>
         <input type="text" id="nameInput" placeholder="例：山田 太郎" />
         <label for="employeeIdInput">事業所</label>
         <input type="text" id="employeeIdInput" placeholder="例：磐田" />
 
+        <p class="privacy-notice">
+          ※入力された情報は本施策のみに使用され、<br />他の目的で使用されることはありません。
+        </p>
+
         <div class="agreement-checkbox">
           <input type="checkbox" id="agreement" name="agreement" />
           <label for="agreement">上記の内容に同意します</label>
         </div>
-
         <button id="submitButton">登録</button>
         <div id="statusMessage"></div>
       </section>
