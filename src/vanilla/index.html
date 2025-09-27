@@ -164,7 +164,6 @@
         border-radius: 0.5rem;
         margin-bottom: 1rem;
       }
-      /* ===== 追加したスタイル ===== */
       .store-selection {
         display: flex;
         flex-direction: column;
@@ -189,6 +188,17 @@
         width: 1.2em;
         height: 1.2em;
       }
+      /* ===== 追加したスタイル ===== */
+      .agreement-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        justify-content: center;
+      }
+      .agreement-checkbox label {
+        font-weight: normal;
+      }
     </style>
   </head>
   <body>
@@ -202,10 +212,17 @@
             >※入力された情報は本施策のみに使用され、<br />他の目的で使用されることはありません。</span
           >
         </p>
+
         <label for="nameInput">お名前</label>
         <input type="text" id="nameInput" placeholder="例：山田 太郎" />
         <label for="employeeIdInput">事業所</label>
         <input type="text" id="employeeIdInput" placeholder="例：磐田" />
+
+        <div class="agreement-checkbox">
+          <input type="checkbox" id="agreement" name="agreement" />
+          <label for="agreement">上記の内容に同意します</label>
+        </div>
+
         <button id="submitButton">登録</button>
         <div id="statusMessage"></div>
       </section>
@@ -300,6 +317,7 @@
         );
         const purchaseIdDisplay = document.getElementById("purchaseIdDisplay");
         const userInfoDisplays = document.querySelectorAll(".userInfoDisplay");
+        const agreementCheckbox = document.getElementById("agreement");
 
         // ===== GASのURL =====
         // ご自身のGoogle Apps ScriptのWebアプリURLに書き換えてください
@@ -363,6 +381,14 @@
             statusMessage.className = "error";
             return;
           }
+
+          if (!agreementCheckbox.checked) {
+            statusMessage.textContent =
+              "⚠️ 同意チェックボックスにチェックを入れてください。";
+            statusMessage.className = "error";
+            return;
+          }
+
           submitButton.disabled = true;
           statusMessage.textContent = "📡 登録中...";
           statusMessage.className = "";
@@ -403,7 +429,6 @@
         // ===== 購入ボタン =====
         purchaseButtons.forEach((button) => {
           button.addEventListener("click", async () => {
-            // **ここから変更**
             const selectedStore = document.querySelector(
               'input[name="storeLocation"]:checked'
             );
@@ -412,11 +437,10 @@
               return;
             }
             const storeLocation = selectedStore.value;
-            // **ここまで変更**
 
             if (
               !confirm(
-                `${storeLocation}で「${button.dataset.bentoName}」を購入します。よろしいですか？` // 確認メッセージを修正
+                `${storeLocation}で「${button.dataset.bentoName}」を購入します。よろしいですか？`
               )
             )
               return;
@@ -456,7 +480,7 @@
                 bentoName: button.dataset.bentoName,
                 action: "purchase",
                 userId: userId,
-                storeLocation: storeLocation, // **店舗情報を追加**
+                storeLocation: storeLocation,
               });
 
               const response = await fetch(GAS_URL, {
